@@ -17,6 +17,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobContainerClientBuilder;
+import com.azure.core.util.BinaryData;
+
 /**
  * Resource for managing media files, such as images.
  */
@@ -24,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 public class MediaResource
 {
 	Map<String,byte[]> map = new HashMap<String,byte[]>();
+	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=lab52656;AccountKey=aJeoanKvZB+ou9nWsIFWdvdVoq8CGliJVDduXBPJicbehuqMHvqrWzMGo4rOTJTlGF5dCcsDhHXYcdBZ6BKpkQ==;EndpointSuffix=core.windows.net";
 
 	/**
 	 * Post a new image.The id of the image is its hash.
@@ -33,9 +39,20 @@ public class MediaResource
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String upload(byte[] contents) {
-		String key = Hash.of(contents);
-		map.put( key, contents);
-		return key;
+		BlobContainerClient containerClient = new BlobContainerClientBuilder()
+														.connectionString(storageConnectionString)
+														.containerName("images")
+														.buildClient();
+														
+	// Get client to blob
+	String key = Hash.of(contents);
+		BlobClient blob = containerClient.getBlobClient(key);
+
+	// Upload contents from BinaryData (check documentation for other alternatives)
+	BinaryData binaryData = BinaryData.fromBytes(contents);
+			blob.upload(binaryData);	
+		
+		return "filename";												
 	}
 
 	/**
