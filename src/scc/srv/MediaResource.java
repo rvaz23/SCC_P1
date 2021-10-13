@@ -1,5 +1,6 @@
 package scc.srv;
 
+import com.azure.storage.blob.models.BlobItem;
 import scc.utils.Hash;
 
 import java.util.ArrayList;
@@ -29,8 +30,11 @@ import com.azure.core.util.BinaryData;
 public class MediaResource
 {
 	Map<String,byte[]> map = new HashMap<String,byte[]>();
-	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=lab52656;AccountKey=aJeoanKvZB+ou9nWsIFWdvdVoq8CGliJVDduXBPJicbehuqMHvqrWzMGo4rOTJTlGF5dCcsDhHXYcdBZ6BKpkQ==;EndpointSuffix=core.windows.net";
-
+	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=lab52656;AccountKey=OI2kIn97Yxi8qkeb6+HfxdYjoft/9LdehhfhH+lr3+exqSuxZ60Hq8RYctTkH9mr/YTDNcOk71uo5Lgy19doXw==;EndpointSuffix=core.windows.net";
+	BlobContainerClient containerClient = new BlobContainerClientBuilder()
+			.connectionString(storageConnectionString)
+			.containerName("images")
+			.buildClient();
 	/**
 	 * Post a new image.The id of the image is its hash.
 	 */
@@ -39,20 +43,15 @@ public class MediaResource
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String upload(byte[] contents) {
-		BlobContainerClient containerClient = new BlobContainerClientBuilder()
-														.connectionString(storageConnectionString)
-														.containerName("images")
-														.buildClient();
-														
-	// Get client to blob
+
 	String key = Hash.of(contents);
-		BlobClient blob = containerClient.getBlobClient(key);
+	BlobClient blob = containerClient.getBlobClient(key);
 
 	// Upload contents from BinaryData (check documentation for other alternatives)
 	BinaryData binaryData = BinaryData.fromBytes(contents);
-			blob.upload(binaryData);	
+	blob.upload(binaryData);
 		
-		return "filename";												
+		return key;
 	}
 
 	/**
@@ -63,9 +62,10 @@ public class MediaResource
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public byte[] download(@PathParam("id") String id) {
-		byte[] content = map.get(id);
-		if(content!=null){
-			return content;
+		BlobClient blob = containerClient.getBlobClient(id);
+		if (blob.exists()){
+		BinaryData data = blob.downloadContent();
+			return data.toBytes();
 		}
 		//TODO: complete !
 		throw new ServiceUnavailableException();
@@ -78,6 +78,10 @@ public class MediaResource
 	@Path("/")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<String> list() {
-		return new ArrayList<String>( map.keySet());
+		List<String> results= new ArrayList<String>();
+		for (BlobItem blobItem : containerClient.listBlobs()) {
+			results.add(blobItem.getName());
+		}
+		return results;
 	}
 }
