@@ -30,7 +30,7 @@ import com.azure.core.util.BinaryData;
 public class MediaResource
 {
 	Map<String,byte[]> map = new HashMap<String,byte[]>();
-	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=lab52656;AccountKey=OI2kIn97Yxi8qkeb6+HfxdYjoft/9LdehhfhH+lr3+exqSuxZ60Hq8RYctTkH9mr/YTDNcOk71uo5Lgy19doXw==;EndpointSuffix=core.windows.net";
+	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=lab52656;AccountKey=mF3FicsjjBeIdkDwG1EnqV77E99uyTfEKKEkq61v7oZ9jGLmdASbLhg/UNUnQ+pNPJnoO7TnRZmP47TkPRFkOg==;EndpointSuffix=core.windows.net";
 	BlobContainerClient containerClient = new BlobContainerClientBuilder()
 			.connectionString(storageConnectionString)
 			.containerName("images")
@@ -48,8 +48,10 @@ public class MediaResource
 	BlobClient blob = containerClient.getBlobClient(key);
 
 	// Upload contents from BinaryData (check documentation for other alternatives)
+	if(!blob.exists()){
 	BinaryData binaryData = BinaryData.fromBytes(contents);
 	blob.upload(binaryData);
+	}
 		
 		return key;
 	}
