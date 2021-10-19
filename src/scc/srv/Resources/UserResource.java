@@ -5,6 +5,9 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
+import scc.data.CosmosDBLayer;
+import scc.data.User;
+import scc.data.UserDAO;
 import scc.utils.Hash;
 
 import javax.ws.rs.*;
@@ -16,19 +19,21 @@ import java.util.Map;
 
 public class UserResource {
 
-    @Path("/users")
+
+    CosmosDBLayer db = CosmosDBLayer.getInstance();
+    @Path("/user")
     public class MediaResource
     {
         /**
          * Post a new image.The id of the image is its hash.
          */
         @POST
-        @Path("/create")
-        @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+        @Path("/")
         @Produces(MediaType.APPLICATION_JSON)
-        public String create() {
-            //TODO
-            return null;
+        public User create(User user) {
+            UserDAO userDAO = new UserDAO(user);
+            db.putUser(userDAO);
+            return user;
         }
 
         /**
@@ -38,8 +43,8 @@ public class UserResource {
         @GET
         @Path("/{id}")
         @Produces(MediaType.APPLICATION_OCTET_STREAM)
-        public byte[] getById(@PathParam("id") String id) {
-            //TODO
+        public User  getById(@PathParam("id") String id) {
+            UserDAO u = (UserDAO)db.getUserById(id).stream().findFirst().get();
             throw new ServiceUnavailableException();
         }
 
@@ -49,8 +54,8 @@ public class UserResource {
         @GET
         @Path("/")
         @Produces(MediaType.APPLICATION_JSON)
-        public List<String> getAll() {
-            //TODO
+        public List<User> getAll() {
+            db.getUsers();
             return null;
         }
     }
