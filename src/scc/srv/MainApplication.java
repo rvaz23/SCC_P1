@@ -1,6 +1,7 @@
 package scc.srv;
 
 import scc.srv.Resources.MediaResource;
+import scc.srv.Resources.UserResource;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,7 +16,9 @@ public class MainApplication extends Application
 	public MainApplication() {
 		resources.add(ControlResource.class);
 //		resources.add(MediaResource.class);
+		resources.add(UserResource.class);
 		singletons.add( new MediaResource());
+		//singletons.add( new UserResource());
 	}
 
 	@Override

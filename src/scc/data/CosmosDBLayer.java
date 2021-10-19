@@ -12,7 +12,7 @@ import com.azure.cosmos.models.PartitionKey;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
 public class CosmosDBLayer {
-	private static final String CONNECTION_URL = "https://scc52656db.documents.azure.com:443/";
+	private static final String CONNECTION_URL = "https://scc202152656.documents.azure.com:443/";
 	private static final String DB_KEY = "BfWmPpznNMTjj3f2eG4ScmDlaPoJOHE2QUeS7IgwGbaXfXjoiuG7N8JR6E34Xj47qTM6bU2ZPMDSZaJ4E7m2fw==";
 	private static final String DB_NAME = "scc52656db";
 	

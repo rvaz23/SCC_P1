@@ -1,5 +1,6 @@
 package scc.srv.Resources;
 
+import com.azure.core.annotation.BodyParam;
 import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
@@ -14,13 +15,11 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
 
+
+
+@Path("/user")
 public class UserResource {
-
-
-    CosmosDBLayer db = CosmosDBLayer.getInstance();
-    @Path("/user")
-    public class MediaResource
-    {
+        CosmosDBLayer db = CosmosDBLayer.getInstance();
         /**
          * Post a new image.The id of the image is its hash.
          */
@@ -61,6 +60,5 @@ public class UserResource {
            }
             return ids;
         }
-    }
-
 }
+
