@@ -1,4 +1,4 @@
-package scc.srv;
+package scc.srv.Resources;
 
 import com.azure.storage.blob.models.BlobItem;
 import scc.utils.Hash;
