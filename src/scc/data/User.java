@@ -11,6 +11,7 @@ public class User {
 	private String pwd;
 	private String photoId;
 	private String[] channelIds;
+
 	public User(String id, String name, String pwd, String photoId, String[] channelIds) {
 		super();
 		this.id = id;

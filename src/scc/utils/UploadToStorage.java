@@ -20,10 +20,7 @@ public class UploadToStorage {
 
         // Get connection string in the storage access keys page
         String storageConnectionString = "ZVZ2knY7OT+3hSmDnmx2B5aeN1dmPlUh8AYtIwx5tj7oLD7LvIbFgxvomCppmropkOhZl539nwsMk3POMRW4jg==";
-
 	}
-
-
 
 
     public void list(String filename, String storageConnectionString){

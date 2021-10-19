@@ -44,16 +44,16 @@ public class MediaResource
 	@Produces(MediaType.APPLICATION_JSON)
 	public String upload(byte[] contents) {
 
-	String key = Hash.of(contents);
-	BlobClient blob = containerClient.getBlobClient(key);
+		String key = Hash.of(contents);
+		BlobClient blob = containerClient.getBlobClient(key);
 
-	// Upload contents from BinaryData (check documentation for other alternatives)
-	if(!blob.exists()){
-	BinaryData binaryData = BinaryData.fromBytes(contents);
-	blob.upload(binaryData);
-	}
-		
-		return key;
+		// Upload contents from BinaryData (check documentation for other alternatives)
+		if(!blob.exists()){
+		BinaryData binaryData = BinaryData.fromBytes(contents);
+		blob.upload(binaryData);
+		}
+
+			return key;
 	}
 
 	/**

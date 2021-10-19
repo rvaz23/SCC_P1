@@ -12,10 +12,7 @@ import scc.utils.Hash;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UserResource {
 
@@ -44,19 +41,25 @@ public class UserResource {
         @Path("/{id}")
         @Produces(MediaType.APPLICATION_OCTET_STREAM)
         public User  getById(@PathParam("id") String id) {
-            UserDAO u = (UserDAO)db.getUserById(id).stream().findFirst().get();
-            throw new ServiceUnavailableException();
+            UserDAO u = db.getUserById(id).stream().findFirst().get();
+
+            return u.toUser();
+            //throw new ServiceUnavailableException();
         }
 
         /**
-         * Lists the ids of images stored.
+         * Lists the ids of users.
          */
         @GET
         @Path("/")
         @Produces(MediaType.APPLICATION_JSON)
-        public List<User> getAll() {
-            db.getUsers();
-            return null;
+        public List<String> getAll() {
+            List<String> ids = new ArrayList<>();
+
+            for (UserDAO u : db.getUsers()){
+                ids.add(u.getId());
+           }
+            return ids;
         }
     }
 
