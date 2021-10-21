@@ -38,6 +38,7 @@ public class CosmosDBLayer {
 	private CosmosClient client;
 	private CosmosDatabase db;
 	private CosmosContainer users;
+	private CosmosContainer messages;
 	
 	public CosmosDBLayer(CosmosClient client) {
 		this.client = client;
@@ -48,25 +49,50 @@ public class CosmosDBLayer {
 			return;
 		db = client.getDatabase(DB_NAME);
 		users = db.getContainer("users");
+		messages= db.getContainer("messages");
 		
 	}
+	//------------------------------Messages------------------------------
+
+	public CosmosItemResponse<Object> delMessageById(String id) {
+		init();
+		PartitionKey key = new PartitionKey( id);
+		return messages.deleteItem(id, key, new CosmosItemRequestOptions());
+	}
+	public CosmosItemResponse<Object> delMessage(MessageDAO message) {
+		init();
+		return messages.deleteItem(message, new CosmosItemRequestOptions());
+	}
+	public CosmosItemResponse<MessageDAO> putMessage(MessageDAO message) {
+		init();
+		return messages.createItem(message);
+	}
+
+	public CosmosPagedIterable<MessageDAO> getMessageById( String id) {
+		init();
+		return messages.queryItems("SELECT * FROM messages WHERE message.id=\"" + id + "\"", new CosmosQueryRequestOptions(), MessageDAO.class);
+	}
+
+	public CosmosPagedIterable<MessageDAO> getMessages() {
+		init();
+		return messages.queryItems("SELECT * FROM messages ", new CosmosQueryRequestOptions(), MessageDAO.class);
+	}
+
+	//------------------------------Users------------------------------
 
 	public CosmosItemResponse<Object> delUserById(String id) {
 		init();
 		PartitionKey key = new PartitionKey( id);
 		return users.deleteItem(id, key, new CosmosItemRequestOptions());
 	}
-	
-	public CosmosItemResponse<Object> delUser(UserDAO user) {
+	public CosmosItemResponse<Object> delUser(MessageDAO user) {
 		init();
 		return users.deleteItem(user, new CosmosItemRequestOptions());
 	}
-	
 	public CosmosItemResponse<UserDAO> putUser(UserDAO user) {
 		init();
 		return users.createItem(user);
 	}
-	
 	public CosmosPagedIterable<UserDAO> getUserById( String id) {
 		init();
 		return users.queryItems("SELECT * FROM users WHERE users.id=\"" + id + "\"", new CosmosQueryRequestOptions(), UserDAO.class);

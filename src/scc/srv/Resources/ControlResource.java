@@ -1,4 +1,4 @@
-package scc.srv;
+package scc.srv.Resources;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

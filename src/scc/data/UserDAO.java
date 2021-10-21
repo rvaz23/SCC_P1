@@ -61,10 +61,9 @@ public class UserDAO {
 	public String getPhotoId() {
 		return photoId;
 	}
-	public void setPhotoId(String photoId) {
-		this.photoId = photoId;
-	}
+	public void setPhotoId(String photoId) {this.photoId = photoId;}
 	public String[] getChannelIds() {
+
 		return channelIds == null ? new String[0] : channelIds ;
 	}
 	public void setChannelIds(String[] channelIds) {

@@ -21,7 +21,7 @@ import java.util.*;
 public class UserResource {
         CosmosDBLayer db = CosmosDBLayer.getInstance();
         /**
-         * Post a new image.The id of the image is its hash.
+         * Post a new user.The id of the user is its hash.
          */
         @POST
         @Path("/")
@@ -33,8 +33,7 @@ public class UserResource {
         }
 
         /**
-         * Return the contents of an image. Throw an appropriate error message if
-         * id does not exist.
+         * Return the user with the id.
          */
         @GET
         @Path("/{id}")
@@ -47,7 +46,7 @@ public class UserResource {
         }
 
         /**
-         * Lists the ids of users.
+         * Lists the ids of all users.
          */
         @GET
         @Path("/")
