@@ -70,7 +70,7 @@ public class CosmosDBLayer {
 
 	public CosmosPagedIterable<MessageDAO> getMessageById( String id) {
 		init();
-		return messages.queryItems("SELECT * FROM messages WHERE message.id=\"" + id + "\"", new CosmosQueryRequestOptions(), MessageDAO.class);
+		return messages.queryItems("SELECT * FROM messages WHERE messages.id=\"" + id + "\"", new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
 
 	public CosmosPagedIterable<MessageDAO> getMessages() {
