@@ -93,6 +93,13 @@ public class CosmosDBLayer {
 		init();
 		return users.createItem(user);
 	}
+
+    public CosmosItemResponse<UserDAO> updateUser(String id,UserDAO user) {
+        init();
+		PartitionKey key = new PartitionKey( id);
+        return users.replaceItem(user,id,key,new CosmosItemRequestOptions());
+    }
+
 	public CosmosPagedIterable<UserDAO> getUserById( String id) {
 		init();
 		return users.queryItems("SELECT * FROM users WHERE users.id=\"" + id + "\"", new CosmosQueryRequestOptions(), UserDAO.class);
