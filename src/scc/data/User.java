@@ -20,6 +20,10 @@ public class User {
 		this.photoId = photoId;
 		this.channelIds = channelIds;
 	}
+
+	public User(){
+
+	}
 	public String getId() {
 		return id;
 	}

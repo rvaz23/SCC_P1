@@ -38,7 +38,7 @@ public class UserResource {
          */
         @GET
         @Path("/{id}")
-        @Produces(MediaType.APPLICATION_OCTET_STREAM)
+        @Produces(MediaType.APPLICATION_JSON)
         public User  getById(@PathParam("id") String id) {
             UserDAO u = db.getUserById(id).stream().findFirst().get();
 
