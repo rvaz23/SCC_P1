@@ -3,6 +3,7 @@ package scc.srv.Resources;
 import com.azure.core.annotation.BodyParam;
 import com.azure.core.annotation.Put;
 import com.azure.core.util.BinaryData;
+import com.azure.cosmos.util.CosmosPagedIterable;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
@@ -46,28 +47,34 @@ public class UserResource {
             //throw new ServiceUnavailableException();
         }
 
-    /**
-     * Return the user with the id.
-     */
-    @PUT
-    @Path("/{id}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public User  UpdateById(@PathParam("id") String id,User user) {
-        UserDAO u = db.getUserById(id).stream().findFirst().get();
-        if (user.getId()!=null || !user.getId().equals("")){
-            u.setId(user.getId());
+        /**
+         * Return the user with the id.
+         */
+        @PUT
+        @Path("/{id}")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        public User  UpdateById(@PathParam("id") String id,User user) {
+            CosmosPagedIterable<UserDAO> uList = db.getUserById(id);
+            UserDAO u = null;
+            if(uList!=null ){
+                u = uList.stream().findFirst().get();
+                if (user.getId()!=null || !user.getId().equals("")){
+                    u.setId(user.getId());
+                }
+                if (user.getName()!=null || !user.getName().equals("")){
+                    u.setName(user.getName());
+                }
+                if(user.getPhotoId()!=null || !user.getPhotoId().equals("")){
+                    u.setPhotoId(user.getPhotoId());
+                }
+                db.updateUser(id,u);
+                return u.toUser();
+            }
+            else return null;
+
+            //throw new ServiceUnavailableException();
         }
-        if (user.getName()!=null || !user.getName().equals("")){
-            u.setName(user.getName());
-        }
-        if(user.getPhotoId()!=null || !user.getPhotoId().equals("")){
-            u.setPhotoId(user.getPhotoId());
-        }
-        db.updateUser(id,u);
-        return u.toUser();
-        //throw new ServiceUnavailableException();
-    }
 
         /**
          * Lists the ids of all users.

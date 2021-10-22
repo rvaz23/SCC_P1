@@ -9,6 +9,7 @@ public class Message {
     private String repliesToId;
 
     public Message(String id, String senderId, String channelId, String text, String mediaId, String repliesToId) {
+        super();
         this.id = id;
         this.senderId = senderId;
         this.channelId = channelId;

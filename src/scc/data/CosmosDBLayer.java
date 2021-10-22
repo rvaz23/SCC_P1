@@ -39,6 +39,7 @@ public class CosmosDBLayer {
 	private CosmosDatabase db;
 	private CosmosContainer users;
 	private CosmosContainer messages;
+	private CosmosContainer channels;
 	
 	public CosmosDBLayer(CosmosClient client) {
 		this.client = client;
@@ -50,6 +51,7 @@ public class CosmosDBLayer {
 		db = client.getDatabase(DB_NAME);
 		users = db.getContainer("users");
 		messages= db.getContainer("messages");
+		channels = db.getContainer("channels");
 		
 	}
 	//------------------------------Messages------------------------------
@@ -77,6 +79,35 @@ public class CosmosDBLayer {
 		init();
 		return messages.queryItems("SELECT * FROM messages ", new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
+	//------------------------------Channels------------------------------
+
+	public CosmosItemResponse<ChannelDAO> putChannel(ChannelDAO channel) {
+		init();
+		return channels.createItem(channel);
+	}
+
+	public CosmosPagedIterable<ChannelDAO> getChannels() {
+		init();
+		return channels.queryItems("SELECT * FROM channels ", new CosmosQueryRequestOptions(), ChannelDAO.class);
+	}
+
+	public CosmosPagedIterable<ChannelDAO> getChannelById( String id) {
+		init();
+		return channels.queryItems("SELECT * FROM channels WHERE channels.id=\"" + id + "\"", new CosmosQueryRequestOptions(), ChannelDAO.class);
+	}
+
+	public CosmosItemResponse<Object> delChannelById(String id) {
+		init();
+		PartitionKey key = new PartitionKey( id);
+		return channels.deleteItem(id, key, new CosmosItemRequestOptions());
+	}
+
+	public CosmosItemResponse<ChannelDAO> updateChannel(String id,ChannelDAO channel) {
+		init();
+		PartitionKey key = new PartitionKey( id);
+		return channels.replaceItem(channel,id,key,new CosmosItemRequestOptions());
+	}
+
 
 	//------------------------------Users------------------------------
 
