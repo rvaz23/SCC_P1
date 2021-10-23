@@ -48,13 +48,13 @@ public class UserResource {
         }
 
         /**
-         * Return the user with the id.
+         * Updates and returns the user if id is valid.
          */
         @PUT
         @Path("/{id}")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public User  UpdateById(@PathParam("id") String id,User user) {
+        public User  updateById(@PathParam("id") String id,User user) {
             CosmosPagedIterable<UserDAO> uList = db.getUserById(id);
             UserDAO u = null;
             if(uList!=null ){
@@ -74,6 +74,23 @@ public class UserResource {
             else return null;
 
             //throw new ServiceUnavailableException();
+        }
+
+        @DELETE
+        @Path("/{id}")
+        @Produces(MediaType.APPLICATION_JSON)
+        public User  deleteById(@PathParam("id") String id) {
+            CosmosPagedIterable<UserDAO> uList = db.getUserById(id);
+            UserDAO u = null;
+            if(uList!=null ){
+                u = uList.stream().findFirst().get();
+                UserDAO response = (UserDAO) db.delUser(u).getItem();
+                if(response!=null){
+                    return u.toUser();
+                }
+                return u.toUser();
+            }
+             return null;
         }
 
         /**

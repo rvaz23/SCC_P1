@@ -116,7 +116,7 @@ public class CosmosDBLayer {
 		PartitionKey key = new PartitionKey( id);
 		return users.deleteItem(id, key, new CosmosItemRequestOptions());
 	}
-	public CosmosItemResponse<Object> delUser(MessageDAO user) {
+	public CosmosItemResponse<Object> delUser(UserDAO user) {
 		init();
 		return users.deleteItem(user, new CosmosItemRequestOptions());
 	}
