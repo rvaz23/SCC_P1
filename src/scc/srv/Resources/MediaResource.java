@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ServiceUnavailableException;
@@ -71,6 +72,18 @@ public class MediaResource
 		}
 		//TODO: complete !
 		throw new ServiceUnavailableException();
+	}
+	
+	@DELETE
+	@Path("/{id}")
+	public boolean delete(@PathParam("id") String id) {
+		BlobClient blob = containerClient.getBlobClient(id);
+		if (blob.exists()){
+		blob.delete();
+		return true;
+		}else {
+			return false;
+		}
 	}
 
 	/**
