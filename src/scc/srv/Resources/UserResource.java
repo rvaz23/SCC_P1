@@ -8,6 +8,8 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
+
+import io.netty.handler.codec.http.HttpResponseStatus;
 import scc.data.ChannelDAO;
 import scc.data.CosmosDBLayer;
 import scc.data.User;
@@ -16,6 +18,8 @@ import scc.utils.Hash;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -29,7 +33,7 @@ public class UserResource {
         @POST
         @Path("/")
         @Produces(MediaType.APPLICATION_JSON)
-        public User create(User user) {
+        public Response create(User user) {
             UserDAO userDAO = new UserDAO(user);
 
             //adiciona user ao canal
@@ -43,7 +47,7 @@ public class UserResource {
             }
 
             db.putUser(userDAO);
-            return user;
+            return Response.status(Response.Status.OK).entity(user).build();
         }
 
         /**
