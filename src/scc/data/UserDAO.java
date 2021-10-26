@@ -1,5 +1,6 @@
 package scc.data;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -12,7 +13,7 @@ public class UserDAO {
 	private String name;
 	private String pwd;
 	private String photoId;
-	private String[] channelIds;
+	private ArrayList<String> channelIds;
 
 	public UserDAO() {
 	}
@@ -21,7 +22,7 @@ public class UserDAO {
 
 		this(u.getId(), u.getName(), u.getPwd(), u.getPhotoId(), u.getChannelIds());
 	}
-	public UserDAO(String id, String name, String pwd, String photoId, String[] channelIds) {
+	public UserDAO(String id, String name, String pwd, String photoId, ArrayList<String> channelIds) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -31,7 +32,7 @@ public class UserDAO {
 	}
 
 	public User toUser() {
-		return new User( id, name, pwd, photoId, channelIds == null ? null : Arrays.copyOf(channelIds,channelIds.length));
+		return new User( id, name, pwd, photoId, channelIds!=null ?channelIds: new ArrayList<>(0));
 	}
 
 	public String get_rid() {
@@ -68,16 +69,22 @@ public class UserDAO {
 		return photoId;
 	}
 	public void setPhotoId(String photoId) {this.photoId = photoId;}
-	public String[] getChannelIds() {return channelIds == null ? new String[0] : channelIds ;}
-	public void setChannelIds(String[] channelIds) {
+
+	public ArrayList<String> getChannelIds() {return channelIds;}
+
+	public void setChannelIds(ArrayList<String> channelIds) {
 		this.channelIds = channelIds;
+	}
+
+	public void addChannelToUser(String idChannel){
+		channelIds.add(idChannel);
 	}
 
 
 	@Override
 	public String toString() {
 		return "UserDAO [_rid=" + _rid + ", _ts=" + _ts + ", id=" + id + ", name=" + name + ", pwd=" + pwd
-				+ ", photoId=" + photoId + ", channelIds=" + Arrays.toString(channelIds) + "]";
+				+ ", photoId=" + photoId + ", channelIds=" + channelIds.toString() + "]";
 	}
 
 }

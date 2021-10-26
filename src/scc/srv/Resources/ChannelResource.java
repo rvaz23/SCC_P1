@@ -34,12 +34,20 @@ public class ChannelResource {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public String deleteById(@PathParam("id") String id) {
-
         if(db.getUserById(id)!=null){
             db.delChannelById(id);
             return id;
         }
         return null;
+    }
+
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Channel getById(@PathParam("id") String id) {
+        ChannelDAO u = db.getChannelById(id).stream().findFirst().get();
+        return u.toChannel();
+        //throw new ServiceUnavailableException();
     }
 
     /**

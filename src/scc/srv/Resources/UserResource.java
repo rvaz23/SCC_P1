@@ -17,7 +17,7 @@ import scc.utils.Hash;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.*;
-
+import java.util.stream.Stream;
 
 
 @Path("/user")
@@ -34,10 +34,11 @@ public class UserResource {
 
             //adiciona user ao canal
             for(String id: user.getChannelIds()){
-                ChannelDAO c =db.getChannelById(id).stream().findFirst().get();;
-                if(c!=null){
-                     c.addUserToChannel(user.getId());
-                     db.updateChannel(c.getId(),c);
+                Optional<ChannelDAO> csmItr =db.getChannelById(id).stream().findFirst();
+                if(!csmItr.isEmpty()){
+                    ChannelDAO c = csmItr.get();
+                    c.addUserToChannel(user.getId());
+                    db.updateChannel(c.getId(),c);
                 }
             }
 
@@ -46,12 +47,37 @@ public class UserResource {
         }
 
         /**
+         * Add user with Id to channel with Id
+         */
+        @PUT
+        @Path("/{idUser}/{idChannel}")
+        @Produces(MediaType.APPLICATION_JSON)
+        public void  addUserToChannel(@PathParam("idUser") String idUser,@PathParam("idChannel") String idChannel) {
+            Optional<UserDAO> csmItrU =db.getUserById(idUser).stream().findFirst();
+            Optional<ChannelDAO> csmItrC =db.getChannelById(idChannel).stream().findFirst();
+
+            if(!csmItrU.isEmpty() ||!csmItrC.isEmpty() ){
+                ChannelDAO c = csmItrC.get();
+                c.addUserToChannel(idUser);
+                db.updateChannel(c.getId(),c);
+
+                UserDAO u = csmItrU.get();
+                u.addChannelToUser(idChannel);
+                db.updateUser(u.getId(),u);
+            }
+
+
+            //throw new ServiceUnavailableException();
+        }
+
+
+        /**
          * Return the user with the id.
          */
         @GET
         @Path("/{id}")
         @Produces(MediaType.APPLICATION_JSON)
-        public User  getById(@PathParam("id") String id) {
+        public User getById(@PathParam("id") String id) {
             UserDAO u = db.getUserById(id).stream().findFirst().get();
             return u.toUser();
             //throw new ServiceUnavailableException();
@@ -65,13 +91,10 @@ public class UserResource {
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         public User  updateById(@PathParam("id") String id,User user) {
-            CosmosPagedIterable<UserDAO> uList = db.getUserById(id);
-            UserDAO u = null;
-            if(uList!=null ){
-                u = uList.stream().findFirst().get();
-                if (user.getId()!=null || !user.getId().equals("")){
-                    u.setId(user.getId());
-                }
+            Optional<UserDAO> csmItr =db.getUserById(id).stream().findFirst();
+            if(!csmItr.isEmpty() ){
+                UserDAO u =csmItr.get();
+
                 if (user.getName()!=null || !user.getName().equals("")){
                     u.setName(user.getName());
                 }

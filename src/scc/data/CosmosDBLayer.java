@@ -87,7 +87,6 @@ public class CosmosDBLayer {
 	}
 
 
-
 	public CosmosPagedIterable<ChannelDAO> getChannels() {
 		init();
 		return channels.queryItems("SELECT * FROM channels ", new CosmosQueryRequestOptions(), ChannelDAO.class);
