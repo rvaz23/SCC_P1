@@ -1,5 +1,6 @@
 package scc.data;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ChannelDAO {
@@ -8,7 +9,7 @@ public class ChannelDAO {
     private String id;
     private String name;
     private boolean status;
-    private String[] memberIds;
+    private ArrayList<String> memberIds;
 
     public ChannelDAO() {
     }
@@ -18,10 +19,10 @@ public class ChannelDAO {
     }
 
     public Channel toChannel(){
-        return new Channel(id,name,status,memberIds!=null ?memberIds: new String[1]);
+        return new Channel(id,name,status,memberIds!=null ?memberIds: new ArrayList<>(0));
     }
 
-    public ChannelDAO(String id, String name, boolean status, String[] memberIds) {
+    public ChannelDAO(String id, String name, boolean status, ArrayList<String> memberIds) {
         super();
         this.id = id;
         this.name = name;
@@ -65,15 +66,19 @@ public class ChannelDAO {
         return status;
     }
 
+    public void addUserToChannel(String id){
+        memberIds.add(id);
+    }
+
     public void setStatus(boolean status) {
         this.status = status;
     }
 
-    public String[] getMemberIds() {
+    public ArrayList<String> getMemberIds() {
         return memberIds;
     }
 
-    public void setMemberIds(String[] memberIds) {
+    public void setMemberIds(ArrayList<String> memberIds) {
         this.memberIds = memberIds;
     }
 
@@ -85,7 +90,7 @@ public class ChannelDAO {
                 ", id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", status=" + status +
-                ", memberIds=" + Arrays.toString(memberIds) +
+                ", memberIds=" + memberIds.toString() +
                 '}';
     }
 }

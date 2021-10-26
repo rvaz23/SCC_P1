@@ -1,14 +1,15 @@
 package scc.data;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Channel {
     private String id;
     private String name;
     private boolean status;
-    private String[] memberIds;
+    private ArrayList<String> memberIds;
 
-    public Channel(String id, String name, boolean status, String[] memberIds) {
+    public Channel(String id, String name, boolean status, ArrayList<String> memberIds) {
         super();
         this.id = id;
         this.name = name;
@@ -44,11 +45,11 @@ public class Channel {
         this.status = status;
     }
 
-    public String[] getMemberIds() {
+    public ArrayList<String> getMemberIds() {
         return memberIds;
     }
 
-    public void setMemberIds(String[] memberIds) {
+    public void setMemberIds(ArrayList<String> memberIds) {
         this.memberIds = memberIds;
     }
 
@@ -58,7 +59,7 @@ public class Channel {
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", status=" + status +
-                ", memberIds=" + Arrays.toString(memberIds) +
+                ", memberIds=" + memberIds.toString() +
                 '}';
     }
 }

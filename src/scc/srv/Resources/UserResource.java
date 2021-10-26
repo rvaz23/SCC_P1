@@ -8,6 +8,7 @@ import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
 import com.azure.storage.blob.models.BlobItem;
+import scc.data.ChannelDAO;
 import scc.data.CosmosDBLayer;
 import scc.data.User;
 import scc.data.UserDAO;
@@ -30,6 +31,16 @@ public class UserResource {
         @Produces(MediaType.APPLICATION_JSON)
         public User create(User user) {
             UserDAO userDAO = new UserDAO(user);
+
+            //adiciona user ao canal
+            for(String id: user.getChannelIds()){
+                ChannelDAO c =db.getChannelById(id).stream().findFirst().get();;
+                if(c!=null){
+                     c.addUserToChannel(user.getId());
+                     db.updateChannel(c.getId(),c);
+                }
+            }
+
             db.putUser(userDAO);
             return user;
         }
@@ -42,7 +53,6 @@ public class UserResource {
         @Produces(MediaType.APPLICATION_JSON)
         public User  getById(@PathParam("id") String id) {
             UserDAO u = db.getUserById(id).stream().findFirst().get();
-
             return u.toUser();
             //throw new ServiceUnavailableException();
         }

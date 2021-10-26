@@ -67,7 +67,7 @@ public class MediaResource
 	public byte[] download(@PathParam("id") String id) {
 		BlobClient blob = containerClient.getBlobClient(id);
 		if (blob.exists()){
-		BinaryData data = blob.downloadContent();
+			BinaryData data = blob.downloadContent();
 			return data.toBytes();
 		}
 		//TODO: complete !

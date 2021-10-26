@@ -86,6 +86,8 @@ public class CosmosDBLayer {
 		return channels.createItem(channel);
 	}
 
+
+
 	public CosmosPagedIterable<ChannelDAO> getChannels() {
 		init();
 		return channels.queryItems("SELECT * FROM channels ", new CosmosQueryRequestOptions(), ChannelDAO.class);
@@ -107,6 +109,9 @@ public class CosmosDBLayer {
 		PartitionKey key = new PartitionKey( id);
 		return channels.replaceItem(channel,id,key,new CosmosItemRequestOptions());
 	}
+
+
+
 
 
 	//------------------------------Users------------------------------
