@@ -15,6 +15,7 @@ import scc.data.CosmosDBLayer;
 import scc.data.User;
 import scc.data.UserDAO;
 import scc.utils.Hash;
+import scc.utils.Quotes;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -81,9 +82,14 @@ public class UserResource {
         @GET
         @Path("/{id}")
         @Produces(MediaType.APPLICATION_JSON)
-        public User getById(@PathParam("id") String id) {
-            UserDAO u = db.getUserById(id).stream().findFirst().get();
-            return u.toUser();
+        public Response getById(@PathParam("id") String id) {
+        	 Optional<UserDAO> op =  db.getUserById(id).stream().findFirst();
+        	if(op.isPresent()) {
+        		UserDAO u = op.get();
+                return Response.status(Response.Status.OK).entity(u.toUser()).build();
+        	}else {
+        		return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+        	}
             //throw new ServiceUnavailableException();
         }
 
@@ -94,11 +100,10 @@ public class UserResource {
         @Path("/{id}")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        public User  updateById(@PathParam("id") String id,User user) {
-            Optional<UserDAO> csmItr =db.getUserById(id).stream().findFirst();
-            if(!csmItr.isEmpty() ){
-                UserDAO u =csmItr.get();
-
+        public Response  updateById(@PathParam("id") String id,User user) {
+        	Optional<UserDAO> op =  db.getUserById(id).stream().findFirst();
+            if(op.isPresent()){
+                UserDAO u =op.get();
                 if (user.getName()!=null || !user.getName().equals("")){
                     u.setName(user.getName());
                 }
@@ -106,9 +111,9 @@ public class UserResource {
                     u.setPhotoId(user.getPhotoId());
                 }
                 db.updateUser(id,u);
-                return u.toUser();
+                return Response.status(Response.Status.OK).entity(u.toUser()).build();
             }
-            else return null;
+            else return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 
             //throw new ServiceUnavailableException();
         }
@@ -116,18 +121,16 @@ public class UserResource {
         @DELETE
         @Path("/{id}")
         @Produces(MediaType.APPLICATION_JSON)
-        public User  deleteById(@PathParam("id") String id) {
-            CosmosPagedIterable<UserDAO> uList = db.getUserById(id);
-            UserDAO u = null;
-            if(uList!=null ){
-                u = uList.stream().findFirst().get();
-                UserDAO response = (UserDAO) db.delUser(u).getItem();
-                if(response!=null){
-                    return u.toUser();
-                }
-                return u.toUser();
+        public Response  deleteById(@PathParam("id") String id) {
+        	Optional<UserDAO> op =  db.getUserById(id).stream().findFirst();
+            if(op.isPresent()){
+                UserDAO u =op.get();
+               db.delUser(u);
+               return Response.status(Response.Status.OK).entity(u.toUser()).build();
+            }else {
+                return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+	
             }
-             return null;
         }
 
         /**
@@ -136,13 +139,13 @@ public class UserResource {
         @GET
         @Path("/")
         @Produces(MediaType.APPLICATION_JSON)
-        public List<String> getAll() {
+        public Response getAll() {
             List<String> ids = new ArrayList<>();
 
             for (UserDAO u : db.getUsers()){
                 ids.add(u.getId());
            }
-            return ids;
+            return Response.status(Response.Status.OK).entity(ids).build();
         }
 }
 
