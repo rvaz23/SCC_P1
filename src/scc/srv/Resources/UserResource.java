@@ -1,20 +1,10 @@
 package scc.srv.Resources;
 
-import com.azure.core.annotation.BodyParam;
-import com.azure.core.annotation.Put;
-import com.azure.core.util.BinaryData;
-import com.azure.cosmos.util.CosmosPagedIterable;
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobContainerClientBuilder;
-import com.azure.storage.blob.models.BlobItem;
-
-import io.netty.handler.codec.http.HttpResponseStatus;
+import lombok.extern.java.Log;
 import scc.data.ChannelDAO;
 import scc.data.CosmosDBLayer;
 import scc.data.User;
 import scc.data.UserDAO;
-import scc.utils.Hash;
 import scc.utils.Quotes;
 
 import javax.ws.rs.*;
@@ -22,9 +12,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import java.util.*;
-import java.util.stream.Stream;
 
-
+@Log
 @Path("/user")
 public class UserResource {
         CosmosDBLayer db = CosmosDBLayer.getInstance();
@@ -35,6 +24,7 @@ public class UserResource {
         @Path("/")
         @Produces(MediaType.APPLICATION_JSON)
         public Response create(User user) {
+            log.info("Create Action Requested at User Resource");
             UserDAO userDAO = new UserDAO(user);
 
             //adiciona user ao canal
@@ -46,7 +36,6 @@ public class UserResource {
                     db.updateChannel(c.getId(),c);
                 }
             }
-
             db.putUser(userDAO);
             return Response.status(Response.Status.OK).entity(user).build();
         }
@@ -58,6 +47,7 @@ public class UserResource {
         @Path("/{idUser}/{idChannel}")
         @Produces(MediaType.APPLICATION_JSON)
         public void  addUserToChannel(@PathParam("idUser") String idUser,@PathParam("idChannel") String idChannel) {
+            log.info("addUserToChannel Action Requested at User Resource");
             Optional<UserDAO> csmItrU =db.getUserById(idUser).stream().findFirst();
             Optional<ChannelDAO> csmItrC =db.getChannelById(idChannel).stream().findFirst();
 
@@ -71,8 +61,28 @@ public class UserResource {
                 db.updateUser(u.getId(),u);
             }
 
-
             //throw new ServiceUnavailableException();
+        }
+
+        /**
+         * Get channels associated to user id
+         * @return
+         */
+        @GET
+        @Path("/{idUser}/channels")
+        @Produces(MediaType.APPLICATION_JSON)
+        public Response getChannelsByUserId(@PathParam("idUser") String idUser) {
+            log.info("getChannelsByUserId Action Requested at User Resource");
+            List<String> channelIds = new ArrayList<>();
+            Optional<UserDAO> op =  db.getUserById(idUser).stream().findFirst();
+            if(op.isPresent()) {
+                UserDAO u = op.get();
+                channelIds = u.getChannelIds();}
+            if(channelIds.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
+            }else {
+                return Response.status(Response.Status.OK).entity(channelIds).build();
+            }
         }
 
 
@@ -83,6 +93,7 @@ public class UserResource {
         @Path("/{id}")
         @Produces(MediaType.APPLICATION_JSON)
         public Response getById(@PathParam("id") String id) {
+             log.info("getById Action Requested at User Resource");
         	 Optional<UserDAO> op =  db.getUserById(id).stream().findFirst();
         	if(op.isPresent()) {
         		UserDAO u = op.get();
@@ -101,6 +112,7 @@ public class UserResource {
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         public Response  updateById(@PathParam("id") String id,User user) {
+            log.info("updateById Action Requested at User Resource");
         	Optional<UserDAO> op =  db.getUserById(id).stream().findFirst();
             if(op.isPresent()){
                 UserDAO u =op.get();
@@ -122,6 +134,7 @@ public class UserResource {
         @Path("/{id}")
         @Produces(MediaType.APPLICATION_JSON)
         public Response  deleteById(@PathParam("id") String id) {
+            log.info("deleteById Action Requested at User Resource");
         	Optional<UserDAO> op =  db.getUserById(id).stream().findFirst();
             if(op.isPresent()){
                 UserDAO u =op.get();
@@ -140,6 +153,7 @@ public class UserResource {
         @Path("/")
         @Produces(MediaType.APPLICATION_JSON)
         public Response getAll() {
+            log.info("getAll Action Requested at User Resource");
             List<String> ids = new ArrayList<>();
 
             for (UserDAO u : db.getUsers()){

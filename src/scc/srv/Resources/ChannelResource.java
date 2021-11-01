@@ -1,16 +1,19 @@
 package scc.srv.Resources;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import lombok.extern.java.Log;
 import scc.data.Channel;
 import scc.data.ChannelDAO;
 import scc.data.CosmosDBLayer;
 import scc.data.User;
 import scc.data.UserDAO;
+import scc.utils.Quotes;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
-
+@Log
 @Path("/channel")
 public class ChannelResource {
     CosmosDBLayer db = CosmosDBLayer.getInstance();
@@ -21,10 +24,11 @@ public class ChannelResource {
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Channel create(Channel channel) {
+    public Response create(Channel channel) {
+        log.info("create Action Requested at Channel Resource");
         ChannelDAO channelDAO = new ChannelDAO(channel);
         db.putChannel(channelDAO);
-        return channel;
+        return Response.status(Response.Status.OK).entity(channel).build();
     }
 
     /**
@@ -33,20 +37,26 @@ public class ChannelResource {
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public String deleteById(@PathParam("id") String id) {
+    public Response deleteById(@PathParam("id") String id) {
+        log.info("deleteById Action Requested at Channel Resource");
         if(db.getUserById(id)!=null){
             db.delChannelById(id);
-            return id;
+            return Response.status(Response.Status.OK).entity(id).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
         }
-        return null;
     }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Channel getById(@PathParam("id") String id) {
+    public Response getById(@PathParam("id") String id) {
+        log.info("getById Action Requested at Channel Resource");
         ChannelDAO u = db.getChannelById(id).stream().findFirst().get();
-        return u.toChannel();
+        if(u != null) {
+            return Response.status(Response.Status.OK).entity(u.toChannel()).build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();}
         //throw new ServiceUnavailableException();
     }
 
@@ -58,7 +68,8 @@ public class ChannelResource {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Channel  UpdateById(@PathParam("id") String id,Channel newChannel) {
+    public Response  UpdateById(@PathParam("id") String id,Channel newChannel) {
+        log.info("updateById Action Requested at Channel Resource");
         ChannelDAO c = db.getChannelById(id).stream().findFirst().get();
         if (newChannel.getId()!=null || !newChannel.getId().equals("")){
             c.setId(newChannel.getId());
@@ -72,7 +83,8 @@ public class ChannelResource {
             c.setMemberIds(newChannel.getMemberIds());
         }
         db.updateChannel(id,c);
-        return c.toChannel();
+        if(c != null )return Response.status(Response.Status.OK).entity(c.toChannel()).build();
+            else  return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
         //throw new ServiceUnavailableException();
     }
 
@@ -84,13 +96,15 @@ public class ChannelResource {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<String> getAll() {
+    public Response getAll() {
+        log.info("getAll Action Requested at Channel Resource");
         List<String> ids = new ArrayList<>();
 
         for (ChannelDAO c: db.getChannels()){
             ids.add(c.getId());
         }
-        return ids;
+        if(!ids.isEmpty())return Response.status(Response.Status.OK).entity(ids).build();
+            else return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
     }
 
 
