@@ -1,14 +1,12 @@
 package scc.srv.Resources;
 
 import lombok.extern.java.Log;
-import scc.data.ChannelDAO;
-import scc.data.CosmosDBLayer;
-import scc.data.User;
-import scc.data.UserDAO;
+import scc.data.*;
 import scc.utils.Quotes;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
 import java.util.*;
@@ -17,6 +15,24 @@ import java.util.*;
 @Path("/user")
 public class UserResource {
         CosmosDBLayer db = CosmosDBLayer.getInstance();
+
+        @POST
+        @Path("/auth")
+        @Consumes(MediaType. APPLICATION_JSON)
+        public Response auth(Login user) {
+            boolean pwdOk = false;
+            // Check pwd
+            if( pwdOk) {
+                String uid = UUID.randomUUID().toString();
+                NewCookie cookie = new NewCookie( "scc:session", uid, "/", null,
+                        "sessionid", 3600, false, true);
+                RedisLayer.getInstance().putSession( new Session( uid, user.getUser()));
+                return Response.ok().cookie(cookie).build();
+            } else
+                throw new NotAuthorizedException("Incorrect login");
+        }
+
+
         /**
          * Post a new user.The id of the user is its hash.
          */
@@ -44,24 +60,27 @@ public class UserResource {
          * Add user with Id to channel with Id
          */
         @PUT
-        @Path("/{idUser}/{idChannel}")
+        @Path("/{idUser}/subscribe/{idChannel}")
         @Produces(MediaType.APPLICATION_JSON)
-        public void  addUserToChannel(@PathParam("idUser") String idUser,@PathParam("idChannel") String idChannel) {
+        public Response  addUserToChannel(@PathParam("idUser") String idUser,@PathParam("idChannel") String idChannel) {
             log.info("addUserToChannel Action Requested at User Resource");
             Optional<UserDAO> csmItrU =db.getUserById(idUser).stream().findFirst();
             Optional<ChannelDAO> csmItrC =db.getChannelById(idChannel).stream().findFirst();
 
-            if(!csmItrU.isEmpty() ||!csmItrC.isEmpty() ){
+            if(csmItrU.isEmpty() ){
+                return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+            }else if(csmItrC.isEmpty() ){
+                return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
+            }else{
                 ChannelDAO c = csmItrC.get();
-                c.addUserToChannel(idUser);
-                db.updateChannel(c.getId(),c);
-
-                UserDAO u = csmItrU.get();
-                u.addChannelToUser(idChannel);
-                db.updateUser(u.getId(),u);
+                if(c.isStatus()) { //verifica se o channel e privado
+                    db.addChannelToUser(idUser,idChannel);
+                    db.addUserToChannel(idChannel,idUser);
+                    return Response.status(Response.Status.OK).build();
+                }else{
+                    return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_IS_PRIVATE).build();
+                }
             }
-
-            //throw new ServiceUnavailableException();
         }
 
         /**

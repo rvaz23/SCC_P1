@@ -5,10 +5,7 @@ import com.azure.cosmos.CosmosClient;
 import com.azure.cosmos.CosmosClientBuilder;
 import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
-import com.azure.cosmos.models.CosmosItemRequestOptions;
-import com.azure.cosmos.models.CosmosItemResponse;
-import com.azure.cosmos.models.CosmosQueryRequestOptions;
-import com.azure.cosmos.models.PartitionKey;
+import com.azure.cosmos.models.*;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
 public class CosmosDBLayer {
@@ -81,6 +78,13 @@ public class CosmosDBLayer {
 	}
 	//------------------------------Channels------------------------------
 
+
+	public CosmosItemResponse<ChannelDAO> addUserToChannel(String idChannel,String idUser) {
+		init();
+		PartitionKey key = new PartitionKey( idChannel);
+		return channels.patchItem(idChannel, key, CosmosPatchOperations.create().add("/memberIds/0",idUser), ChannelDAO.class);
+	}
+
 	public CosmosItemResponse<ChannelDAO> putChannel(ChannelDAO channel) {
 		init();
 		return channels.createItem(channel);
@@ -127,6 +131,12 @@ public class CosmosDBLayer {
 	public CosmosItemResponse<UserDAO> putUser(UserDAO user) {
 		init();
 		return users.createItem(user);
+	}
+
+	public CosmosItemResponse<UserDAO> addChannelToUser(String idUser,String idChannel) {
+		init();
+		PartitionKey key = new PartitionKey( idUser);
+		return users.patchItem(idUser, key, CosmosPatchOperations.create().add("/channelIds/0",idChannel), UserDAO.class);
 	}
 
     public CosmosItemResponse<UserDAO> updateUser(String id,UserDAO user) {

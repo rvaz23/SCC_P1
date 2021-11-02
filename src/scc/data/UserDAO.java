@@ -76,10 +76,6 @@ public class UserDAO {
 		this.channelIds = channelIds;
 	}
 
-	public void addChannelToUser(String idChannel){
-		channelIds.add(idChannel);
-	}
-
 
 	@Override
 	public String toString() {
