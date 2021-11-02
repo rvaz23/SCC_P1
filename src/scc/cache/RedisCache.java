@@ -80,4 +80,13 @@ public class RedisCache {
 		String cookie = client.setex("cookie:"+session.getUid(),3600 ,session.getUser());
 		return cookie;
 	}
+	
+	public boolean verifySessionCookie(String cookie,String user) {
+		String userCookie = client.get("cookie:"+cookie);
+		if(userCookie!=null) {
+			if(userCookie.equals(user))
+				return true;
+		}
+		return false;
+	}
 }
