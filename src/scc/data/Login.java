@@ -2,21 +2,25 @@ package scc.data;
 
 public class Login {
 
-    private String userName;
+    private String user;
     private String pwd;
 
-    public Login(String userName, String pwd) {
-        this.userName = userName;
+    public Login(String user, String pwd) {
+        this.user = user;
         this.pwd = pwd;
+    }
+    
+    public Login() {
+    	
     }
 
 
     public String getUser() {
-        return userName;
+        return user;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setuser(String user) {
+        this.user = user;
     }
 
     public String getPwd() {
