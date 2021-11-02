@@ -149,6 +149,11 @@ public class CosmosDBLayer {
 		init();
 		return users.queryItems("SELECT * FROM users WHERE users.id=\"" + id + "\"", new CosmosQueryRequestOptions(), UserDAO.class);
 	}
+	
+	public CosmosPagedIterable<UserDAO> getUserByUsername( String username) {
+		init();
+		return users.queryItems("SELECT * FROM users WHERE users.name=\"" + username + "\"", new CosmosQueryRequestOptions(), UserDAO.class);
+	}
 
 	public CosmosPagedIterable<UserDAO> getUsers() {
 		init();

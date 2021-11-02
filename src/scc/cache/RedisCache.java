@@ -53,10 +53,11 @@ public class RedisCache {
 	}
 	
 	
-	public String addUser(User user) throws JsonProcessingException {
+	public String setUser(User user) throws JsonProcessingException {
 		init();
 		return client.set("user:"+user.getId(), mapper.writeValueAsString(user));	
 	}
+	
 	public User getUser(String id) throws JsonMappingException, JsonProcessingException {
 		init();
 		String res = client.get("user:"+id);
@@ -64,4 +65,19 @@ public class RedisCache {
 		return user;
 	}
 	
+	public boolean deleteUser(String id) {
+		init();
+		long deleted =client.del("user:"+id);
+		if (deleted>0) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	public String putSession(Session session) {
+		init();
+		String cookie = client.setex("cookie:"+session.getUid(),3600 ,session.getUser());
+		return cookie;
+	}
 }

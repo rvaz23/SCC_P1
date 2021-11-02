@@ -2,6 +2,7 @@ package scc.srv.Resources;
 
 import lombok.extern.java.Log;
 import scc.cache.RedisCache;
+import scc.cache.Session;
 import scc.data.*;
 import scc.utils.Quotes;
 
@@ -26,12 +27,17 @@ public class UserResource {
         public Response auth(Login user) {
             boolean pwdOk = false;
             // Check pwd
+            Optional<UserDAO> userD =db.getUserByUsername(user.getUser()).stream().findFirst();
+            if(userD.isPresent()) {
+            	if(userD.get().getPwd().equals(user.getPwd()))
+            		pwdOk=true;
+            }
+            
             if( pwdOk) {
                 String uid = UUID.randomUUID().toString();
                 NewCookie cookie = new NewCookie( "scc:session", uid, "/", null,
                         "sessionid", 3600, false, true);
-                
-                //RedisCache.getCachePool().putSession( new Session( uid, user.getUser()));
+                cache.putSession( new Session( uid, user.getUser()));
                 return Response.ok().cookie(cookie).build();
             } else
                 throw new NotAuthorizedException("Incorrect login");
@@ -45,6 +51,7 @@ public class UserResource {
         @Path("/")
         @Produces(MediaType.APPLICATION_JSON)
         public Response create(User user) {
+        	//TODO Verificar se dois users nao tem mesmo nome
             log.info("Create Action Requested at User Resource");
             UserDAO userDAO = new UserDAO(user);
 
@@ -134,7 +141,7 @@ public class UserResource {
         		UserDAO u = op.get();
         		//add to cache
         		try {
-					cache.addUser(u.toUser());
+					cache.setUser(u.toUser());
 				} catch (JsonProcessingException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -155,7 +162,7 @@ public class UserResource {
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         public Response  updateById(@PathParam("id") String id,User user) {
-        	cache=RedisCache.getCachePool();
+        	//cache=RedisCache.getCachePool();
             log.info("updateById Action Requested at User Resource");
         	Optional<UserDAO> op =  db.getUserById(id).stream().findFirst();
             if(op.isPresent()){
@@ -167,6 +174,12 @@ public class UserResource {
                     u.setPhotoId(user.getPhotoId());
                 }
                 db.updateUser(id,u);
+                try {
+					cache.setUser(u.toUser());
+				} catch (JsonProcessingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
                 return Response.status(Response.Status.OK).entity(u.toUser()).build();
             }
             else return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
@@ -183,6 +196,7 @@ public class UserResource {
             if(op.isPresent()){
                 UserDAO u =op.get();
                db.delUser(u);
+               cache.deleteUser(id);
                return Response.status(Response.Status.OK).entity(u.toUser()).build();
             }else {
                 return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
