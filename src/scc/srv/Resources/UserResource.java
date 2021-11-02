@@ -1,6 +1,7 @@
 package scc.srv.Resources;
 
 import lombok.extern.java.Log;
+import scc.cache.RedisCache;
 import scc.data.*;
 import scc.utils.Quotes;
 
@@ -9,12 +10,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import java.util.*;
 
 @Log
 @Path("/user")
 public class UserResource {
         CosmosDBLayer db = CosmosDBLayer.getInstance();
+        RedisCache cache = RedisCache.getCachePool();
 
         @POST
         @Path("/auth")
@@ -26,7 +30,8 @@ public class UserResource {
                 String uid = UUID.randomUUID().toString();
                 NewCookie cookie = new NewCookie( "scc:session", uid, "/", null,
                         "sessionid", 3600, false, true);
-                RedisLayer.getInstance().putSession( new Session( uid, user.getUser()));
+                
+                //RedisCache.getCachePool().putSession( new Session( uid, user.getUser()));
                 return Response.ok().cookie(cookie).build();
             } else
                 throw new NotAuthorizedException("Incorrect login");
@@ -113,9 +118,28 @@ public class UserResource {
         @Produces(MediaType.APPLICATION_JSON)
         public Response getById(@PathParam("id") String id) {
              log.info("getById Action Requested at User Resource");
+             //procurar na cache
+             try {
+            	 User user =cache.getUser(id);
+            	 if(user!=null) {
+            		 return Response.status(Response.Status.OK).entity(user).build();
+            	 }
+             } catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+             
         	 Optional<UserDAO> op =  db.getUserById(id).stream().findFirst();
         	if(op.isPresent()) {
         		UserDAO u = op.get();
+        		//add to cache
+        		try {
+					cache.addUser(u.toUser());
+				} catch (JsonProcessingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        		
                 return Response.status(Response.Status.OK).entity(u.toUser()).build();
         	}else {
         		return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
@@ -131,6 +155,7 @@ public class UserResource {
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         public Response  updateById(@PathParam("id") String id,User user) {
+        	cache=RedisCache.getCachePool();
             log.info("updateById Action Requested at User Resource");
         	Optional<UserDAO> op =  db.getUserById(id).stream().findFirst();
             if(op.isPresent()){

@@ -1,3 +1,4 @@
 #Excluir ficheiros de compilador e da build
 /target/*
 .idea/*
+/target/
