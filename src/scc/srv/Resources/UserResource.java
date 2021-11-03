@@ -198,17 +198,21 @@ public class UserResource {
 	@DELETE
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteById(@PathParam("id") String id) {
+	public Response deleteById(@CookieParam("scc:session") Cookie session ,@PathParam("id") String id) {
 		log.info("deleteById Action Requested at User Resource");
 		Optional<UserDAO> op = db.getUserById(id).stream().findFirst();
 		if (op.isPresent()) {
 			UserDAO u = op.get();
-			db.delUser(u);
-			cache.deleteUser(id);
-			return Response.status(Response.Status.OK).entity(u.toUser()).build();
+			if(cache.verifySessionCookie(session.getValue(), u.getName())) {
+				db.delUser(u);
+				cache.deleteUser(id);
+				return Response.status(Response.Status.OK).entity(u.toUser()).build();
+			}else {
+				return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+			}	
 		} else {
-			return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
-
+			//return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+			return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 		}
 	}
 
