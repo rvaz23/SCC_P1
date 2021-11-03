@@ -58,10 +58,15 @@ public class RedisCache {
 		return client.set("user:"+user.getId(), mapper.writeValueAsString(user));	
 	}
 	
-	public User getUser(String id) throws JsonMappingException, JsonProcessingException {
+	public User getUser(String id){
 		init();
 		String res = client.get("user:"+id);
-		User user = mapper.readValue(res, User.class);
+		User user;
+		try {
+			user = mapper.readValue(res, User.class);
+		} catch (Exception e) {
+			return null;
+		}
 		return user;
 	}
 	

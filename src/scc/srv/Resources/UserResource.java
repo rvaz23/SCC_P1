@@ -103,19 +103,42 @@ public class UserResource {
 	@GET
 	@Path("/{idUser}/channels")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getChannelsByUserId(@PathParam("idUser") String idUser) {
+	public Response getChannelsByUserId(@CookieParam("scc:session") Cookie session,
+			@PathParam("idUser") String idUser) {
 		log.info("getChannelsByUserId Action Requested at User Resource");
 		List<String> channelIds = new ArrayList<>();
-		Optional<UserDAO> op = db.getUserById(idUser).stream().findFirst();
-		if (op.isPresent()) {
-			UserDAO u = op.get();
-			channelIds = u.getChannelIds();
+		User user;
+		try {
+			user = cache.getUser(idUser);
+			if (user == null) {
+				Optional<UserDAO> op = db.getUserById(idUser).stream().findFirst();
+				if (op.isPresent()) {
+					UserDAO u = op.get();
+					user=u.toUser();
+					cache.setUser(user);
+				}
+			}
+				String cookie="";
+				if(session!=null) {
+					cookie=session.getValue();
+				}
+				if (cache.verifySessionCookie(cookie, user.getName())) {
+					channelIds=user.getChannelIds();
+					if (channelIds.isEmpty()) {
+						return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
+					} else {
+						return Response.status(Response.Status.OK).entity(channelIds).build();
+					}
+				} else {
+					return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+				}
+			
+
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		if (channelIds.isEmpty()) {
-			return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
-		} else {
-			return Response.status(Response.Status.OK).entity(channelIds).build();
-		}
+		return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 	}
 
 	/**
@@ -124,13 +147,17 @@ public class UserResource {
 	@GET
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getById(@CookieParam("scc:session") Cookie session ,@PathParam("id") String id) {
+	public Response getById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) {
 		log.info("getById Action Requested at User Resource");
 		// procurar na cache
 		try {
 			User user = cache.getUser(id);
 			if (user != null) {
-				if (cache.verifySessionCookie(session.getValue(), user.getName())) {
+				String cookie="";
+				if(session!=null) {
+					cookie=session.getValue();
+				}
+				if (cache.verifySessionCookie(cookie, user.getName())) {
 					return Response.status(Response.Status.OK).entity(user).build();
 				} else {
 					return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
@@ -198,20 +225,25 @@ public class UserResource {
 	@DELETE
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response deleteById(@CookieParam("scc:session") Cookie session ,@PathParam("id") String id) {
+	public Response deleteById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) {
 		log.info("deleteById Action Requested at User Resource");
 		Optional<UserDAO> op = db.getUserById(id).stream().findFirst();
 		if (op.isPresent()) {
 			UserDAO u = op.get();
-			if(cache.verifySessionCookie(session.getValue(), u.getName())) {
+			String cookie="";
+			if(session!=null) {
+				cookie=session.getValue();
+			}
+			if (cache.verifySessionCookie(cookie, u.getName())) {
 				db.delUser(u);
 				cache.deleteUser(id);
 				return Response.status(Response.Status.OK).entity(u.toUser()).build();
-			}else {
+			} else {
 				return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-			}	
+			}
 		} else {
-			//return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+			// return
+			// Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 			return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 		}
 	}
