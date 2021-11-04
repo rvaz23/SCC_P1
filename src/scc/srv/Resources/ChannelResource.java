@@ -35,7 +35,7 @@ public class ChannelResource {
         log.info("create Action Requested at Channel Resource");
         ChannelDAO channelDAO = new ChannelDAO(channel);
         db.putChannel(channelDAO);
-        return Response.status(Response.Status.OK).entity(channel).build();
+        return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
     }
 
     /**

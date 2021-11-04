@@ -66,9 +66,9 @@ public class Channel {
     @Override
     public String toString() {
         return "Channel{" +
-                "id='" + id + '\'' +
+                ", id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", status=" + isPublic +
+                ", isPublic=" + isPublic +
                 ", memberIds=" + memberIds.toString() +
                 '}';
     }

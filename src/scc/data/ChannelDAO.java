@@ -100,7 +100,7 @@ public class ChannelDAO {
                 ", _ts='" + _ts + '\'' +
                 ", id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", status=" + isPublic +
+                ", isPublic=" + isPublic +
                 ", memberIds=" + memberIds.toString() +
                 '}';
     }

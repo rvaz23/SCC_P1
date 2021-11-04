@@ -87,11 +87,15 @@ public class RedisCache {
 	}
 	
 	public boolean verifySessionCookie(String cookie,String user) {
-		String userCookie = client.get("cookie:"+cookie);
-		if(userCookie!=null) {
-			if(userCookie.equals(user))
-				return true;
+		init();
+		if(!cookie.equals("") || !user.equals("")){
+			String userCookie = client.get("cookie:"+cookie);
+			if(userCookie!=null) {
+				if(userCookie.equals(user))
+					return true;
+			}
 		}
+
 		return false;
 	}
 }
