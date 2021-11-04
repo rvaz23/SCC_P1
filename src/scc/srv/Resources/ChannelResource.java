@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Log
 @Path("/channel")
@@ -45,6 +46,30 @@ public class ChannelResource {
             return Response.status(Response.Status.OK).entity(id).build();
         } else {
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
+        }
+    }
+
+
+    /**
+     * Add user with Id to channel with Id
+     */
+    @PUT
+    @Path("/{id}/add/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response addUserToChannel(@PathParam("id") String idChannel,@PathParam("userId") String idUser) {
+        log.info("addUserToChannel Action Requested at Channel Resource");
+        Optional<UserDAO> csmItrU = db.getUserById(idUser).stream().findFirst();
+        Optional<ChannelDAO> csmItrC = db.getChannelById(idChannel).stream().findFirst();
+
+        if (csmItrU.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+        } else if (csmItrC.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
+        } else {
+            ChannelDAO c = csmItrC.get();
+            db.addChannelToUser(idUser, idChannel);
+            db.addUserToChannel(idChannel, idUser);
+            return Response.status(Response.Status.OK).build();
         }
     }
 

@@ -72,10 +72,10 @@ public class UserResource {
 	 * Add user with Id to channel with Id
 	 */
 	@PUT
-	@Path("/{idUser}/subscribe/{idChannel}")
+	@Path("/{id}/subscribe/{channelId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response addUserToChannel(@PathParam("idUser") String idUser, @PathParam("idChannel") String idChannel) {
-		log.info("addUserToChannel Action Requested at User Resource");
+	public Response addChannelToUser(@PathParam("id") String idUser, @PathParam("channelId") String idChannel) {
+		log.info("addChannelToUser Action Requested at User Resource");
 		Optional<UserDAO> csmItrU = db.getUserById(idUser).stream().findFirst();
 		Optional<ChannelDAO> csmItrC = db.getChannelById(idChannel).stream().findFirst();
 
@@ -85,7 +85,7 @@ public class UserResource {
 			return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
 		} else {
 			ChannelDAO c = csmItrC.get();
-			if (c.isStatus()) { // verifica se o channel e privado
+			if (c.isStatus()) { // true -> quando o channel e publico
 				db.addChannelToUser(idUser, idChannel);
 				db.addUserToChannel(idChannel, idUser);
 				return Response.status(Response.Status.OK).build();
@@ -101,10 +101,10 @@ public class UserResource {
 	 * @return
 	 */
 	@GET
-	@Path("/{idUser}/channels")
+	@Path("/{id}/channels")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getChannelsByUserId(@CookieParam("scc:session") Cookie session,
-			@PathParam("idUser") String idUser) {
+			@PathParam("id") String idUser) {
 		log.info("getChannelsByUserId Action Requested at User Resource");
 		List<String> channelIds = new ArrayList<>();
 		User user;
