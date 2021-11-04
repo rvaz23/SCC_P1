@@ -8,27 +8,30 @@ public class ChannelDAO {
     private String _ts;
     private String id;
     private String name;
-    private boolean status;
+    private String owner;
+    private boolean isPublic;
     private ArrayList<String> memberIds;
 
     public ChannelDAO() {
     }
 
     public ChannelDAO( Channel c) {
-        this(c.getId(), c.getName(), c.getStatus(), c.getMemberIds());
+        this(c.getId(), c.getName(), c.getOwner(), c.isPublic(), c.getMemberIds());
     }
 
     public Channel toChannel(){
-        return new Channel(id,name,status,memberIds!=null ?memberIds: new ArrayList<>(0));
+        return new Channel(id,name,owner,isPublic,memberIds!=null ?memberIds: new ArrayList<>(0));
     }
 
-    public ChannelDAO(String id, String name, boolean status, ArrayList<String> memberIds) {
+    public ChannelDAO(String id, String name,String owner, boolean isPublic, ArrayList<String> memberIds) {
         super();
         this.id = id;
         this.name = name;
-        this.status = status;
+        this.owner = owner;
+        this.isPublic = isPublic;
         this.memberIds = memberIds;
     }
+
 
     public String get_rid() {
         return _rid;
@@ -62,16 +65,24 @@ public class ChannelDAO {
         this.name = name;
     }
 
-    public boolean isStatus() {
-        return status;
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    public boolean isPublic() {
+        return isPublic;
     }
 
     public void addUserToChannel(String id){
         memberIds.add(id);
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
+    public void setIsPublic(boolean isPublic) {
+        this.isPublic = isPublic;
     }
 
     public ArrayList<String> getMemberIds() {
@@ -89,7 +100,7 @@ public class ChannelDAO {
                 ", _ts='" + _ts + '\'' +
                 ", id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", status=" + status +
+                ", status=" + isPublic +
                 ", memberIds=" + memberIds.toString() +
                 '}';
     }

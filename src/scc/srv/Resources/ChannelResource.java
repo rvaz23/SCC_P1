@@ -1,14 +1,18 @@
 package scc.srv.Resources;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import lombok.extern.java.Log;
+import scc.cache.RedisCache;
 import scc.data.Channel;
 import scc.data.ChannelDAO;
 import scc.data.CosmosDBLayer;
 import scc.data.User;
 import scc.data.UserDAO;
 import scc.utils.Quotes;
+import javax.ws.rs.*;
+import scc.cache.Session;
 
 import javax.ws.rs.*;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -19,6 +23,7 @@ import java.util.Optional;
 @Path("/channel")
 public class ChannelResource {
     CosmosDBLayer db = CosmosDBLayer.getInstance();
+    RedisCache cache = RedisCache.getCachePool();
 
     /**
      * Post a new channel.The id of the channel is its hash.
@@ -56,20 +61,27 @@ public class ChannelResource {
     @PUT
     @Path("/{id}/add/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addUserToChannel(@PathParam("id") String idChannel,@PathParam("userId") String idUser) {
+    public Response addUserToChannel(@CookieParam("scc:session") Cookie session, @PathParam("id") String idChannel, @PathParam("userId") String idUser) {
         log.info("addUserToChannel Action Requested at Channel Resource");
         Optional<UserDAO> csmItrU = db.getUserById(idUser).stream().findFirst();
         Optional<ChannelDAO> csmItrC = db.getChannelById(idChannel).stream().findFirst();
-
+        String cookie="";
         if (csmItrU.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
         } else if (csmItrC.isEmpty()) {
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
         } else {
+            if(session!=null) {
+                cookie=session.getValue();
+            }
             ChannelDAO c = csmItrC.get();
-            db.addChannelToUser(idUser, idChannel);
-            db.addUserToChannel(idChannel, idUser);
-            return Response.status(Response.Status.OK).build();
+            if (c.isPublic() || ( !c.isPublic() && cache.verifySessionCookie(cookie,c.getOwner() ) )) {
+                db.addChannelToUser(idUser, idChannel);
+                db.addUserToChannel(idChannel, idUser);
+                return Response.status(Response.Status.OK).build();
+            }else{
+                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+            }
         }
     }
 
@@ -103,7 +115,7 @@ public class ChannelResource {
         if (newChannel.getName()!=null || !newChannel.getName().equals("")){
             c.setName(newChannel.getName());
         }
-        c.setStatus(newChannel.getStatus());
+        c.setIsPublic(newChannel.isPublic());
 
         if (newChannel.getMemberIds()!=null ){
             c.setMemberIds(newChannel.getMemberIds());

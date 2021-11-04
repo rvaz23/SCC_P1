@@ -6,14 +6,16 @@ import java.util.Arrays;
 public class Channel {
     private String id;
     private String name;
-    private boolean status;
+    private String owner;
+    private boolean isPublic;
     private ArrayList<String> memberIds;
 
-    public Channel(String id, String name, boolean status, ArrayList<String> memberIds) {
+    public Channel(String id, String name, String owner, boolean isPublic, ArrayList<String> memberIds) {
         super();
         this.id = id;
         this.name = name;
-        this.status = status;
+        this.owner=owner;
+        this.isPublic = isPublic;
         this.memberIds = memberIds;
     }
 
@@ -37,12 +39,20 @@ public class Channel {
         this.name = name;
     }
 
-    public boolean getStatus() {
-        return status;
+    public boolean isPublic() {
+        return isPublic;
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
+    public void setIsPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
     }
 
     public ArrayList<String> getMemberIds() {
@@ -58,7 +68,7 @@ public class Channel {
         return "Channel{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", status=" + status +
+                ", status=" + isPublic +
                 ", memberIds=" + memberIds.toString() +
                 '}';
     }

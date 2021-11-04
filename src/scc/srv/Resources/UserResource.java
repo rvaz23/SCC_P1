@@ -85,7 +85,7 @@ public class UserResource {
 			return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
 		} else {
 			ChannelDAO c = csmItrC.get();
-			if (c.isStatus()) { // true -> quando o channel e publico
+			if (c.isPublic()) { // true -> quando o channel e publico
 				db.addChannelToUser(idUser, idChannel);
 				db.addUserToChannel(idChannel, idUser);
 				return Response.status(Response.Status.OK).build();
