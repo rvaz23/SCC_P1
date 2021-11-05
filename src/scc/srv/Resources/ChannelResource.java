@@ -88,13 +88,19 @@ public class ChannelResource {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getById(@PathParam("id") String id) {
+    public Response getById(@CookieParam("scc:session") Cookie session,@PathParam("id") String id) {
         log.info("getById Action Requested at Channel Resource");
         ChannelDAO u = db.getChannelById(id).stream().findFirst().get();
         if(u != null) {
-            return Response.status(Response.Status.OK).entity(u.toChannel()).build();
+            if(u.isPublic()){
+                return Response.status(Response.Status.OK).entity(u.toChannel()).build();
+            }else{
+                //TODO fazer verificação login
+                return Response.status(Response.Status.OK).entity(u.toChannel()).build();
+            }
         } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();}
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
+        }
         //throw new ServiceUnavailableException();
     }
 
