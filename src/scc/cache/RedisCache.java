@@ -13,8 +13,8 @@ import redis.clients.jedis.JedisPoolConfig;
 import scc.data.User;
 
 public class RedisCache {
-	private static final String RedisHostname = "scc2122cache.redis.cache.windows.net";
-	private static final String RedisKey = "pfPB5YXVKERrWCNlIj15CyXvTWAnpo8BVAzCaGVgyH0=";
+	private static final String RedisHostname = "lab152656.redis.cache.windows.net";
+	private static final String RedisKey = "3cTDiucqBEL39BHdJZyyW44mqDtP6IUZFAzCaMWf8PM=";
 	
 	private static RedisCache instance;
 	
