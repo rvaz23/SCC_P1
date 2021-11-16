@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import scc.data.Channel;
 import scc.data.User;
 
 public class RedisCache {
@@ -59,6 +60,33 @@ public class RedisCache {
 	public String setUser(User user) throws JsonProcessingException {
 		init();
 		return client.set("user:"+user.getId(), mapper.writeValueAsString(user));	
+	}
+
+	public String setChannel(Channel channel) throws  JsonProcessingException{
+		init();
+		return client.set("channel:"+ channel.getId(), mapper.writeValueAsString(channel));
+	}
+
+	public Channel getChannel(String id){
+		init();
+		String res= client.get("channel:"+id);
+		Channel channel;
+		try{
+			channel= mapper.readValue(res,Channel.class);
+		}catch (Exception e){
+			return null;
+		}
+		return channel;
+	}
+
+	public boolean deleteChannel(String id){
+		init();
+		long deleted = client.del("channel:"+id);
+		if(deleted>0){
+			return true;
+		}else{
+			return false;
+		}
 	}
 	
 	public User getUser(String id){
