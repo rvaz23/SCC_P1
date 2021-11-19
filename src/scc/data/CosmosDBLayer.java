@@ -155,9 +155,19 @@ public class CosmosDBLayer {
 		return users.queryItems("SELECT * FROM users WHERE users.name=\"" + username + "\"", new CosmosQueryRequestOptions(), UserDAO.class);
 	}
 
-	public CosmosPagedIterable<UserDAO> getUsers() {
+	public CosmosPagedIterable<UserDAO> getUsers(int offset,int limit) {
 		init();
-		return users.queryItems("SELECT * FROM users ", new CosmosQueryRequestOptions(), UserDAO.class);
+		String offString="";
+		String limString=" LIMIT 20";
+		if (offset!=0){
+			offString=" OFFSET "+offset;
+		}
+		if (limit!=0){
+			limString=" LIMIT "+limit;
+		}
+		String query ="SELECT * FROM users";
+		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
+		return users.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), UserDAO.class);
 	}
 
 	public void close() {
