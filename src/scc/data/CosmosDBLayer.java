@@ -10,7 +10,7 @@ import com.azure.cosmos.util.CosmosPagedIterable;
 
 public class CosmosDBLayer {
 	private static final String CONNECTION_URL = System.getenv("COSMOSDB_URL");//"https://scc52656db.documents.azure.com:443/";
-	private static final String DB_KEY = System.getenv("REDIS_KEY");//"ERc01dQzrml0sg2xw6VETFPOpATzAq6QcexlLOF6PXPRkbHFLu0dHWy57yyEBfPVwDLJ3Auiv0AQRLU4gb2RyQ==";
+	private static final String DB_KEY = System.getenv("COSMOSDB_KEY");//"ERc01dQzrml0sg2xw6VETFPOpATzAq6QcexlLOF6PXPRkbHFLu0dHWy57yyEBfPVwDLJ3Auiv0AQRLU4gb2RyQ==";
 	private static final String DB_NAME = System.getenv("COSMOSDB_DATABASE");//"scc52656db";
 	
 	private static CosmosDBLayer instance;
@@ -157,7 +157,7 @@ public class CosmosDBLayer {
 
 	public CosmosPagedIterable<UserDAO> getUsers(int offset,int limit) {
 		init();
-		String offString="";
+		String offString=" OFFSET 0";
 		String limString=" LIMIT 20";
 		if (offset!=0){
 			offString=" OFFSET "+offset;
@@ -165,7 +165,7 @@ public class CosmosDBLayer {
 		if (limit!=0){
 			limString=" LIMIT "+limit;
 		}
-		String query ="SELECT * FROM users";
+		String query ="SELECT * FROM Users ORDER BY Users.id" ;//LIMIT 20";
 		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
 		return users.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), UserDAO.class);
 	}
