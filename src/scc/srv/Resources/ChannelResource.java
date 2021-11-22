@@ -1,5 +1,6 @@
 package scc.srv.Resources;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.java.Log;
 import scc.cache.RedisCache;
 import scc.data.Channel;
@@ -30,11 +31,25 @@ public class ChannelResource {
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(Channel channel) {
-        log.info("create Action Requested at Channel Resource");
-        ChannelDAO channelDAO = new ChannelDAO(channel);
-        db.putChannel(channelDAO);
-        return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
+    public Response create(@CookieParam("scc:session") Cookie session,Channel channel) throws JsonProcessingException {
+        String cookie = UserResource.getCookie(session);
+        if (cookie.equals(""))
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        User user = GetObjects.getUserIfExists(channel.getOwner());
+        if (user == null)
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        if (cache.verifySessionCookie(cookie, user.getName())) {
+            Channel exists = GetObjects.getChannelIfExists(channel.getId());
+            if (exists==null)
+                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_EXISTS).build();
+            ChannelDAO channelDAO = new ChannelDAO(channel);
+            db.putChannel(channelDAO);
+            cache.setChannel(channelDAO.toChannel());
+            log.info("create Action Requested at Channel Resource");
+            return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
     }
 
     /**

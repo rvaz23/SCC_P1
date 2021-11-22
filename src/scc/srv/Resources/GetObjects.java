@@ -35,5 +35,17 @@ public class GetObjects {
         return message;
     }
 
+    public static Channel getChannelIfExists(String idChannel) throws JsonProcessingException {
+        Channel channel = cache.getChannel(idChannel);
+        if(channel==null){
+            Optional<ChannelDAO> op = db.getChannelById(idChannel).stream().findFirst();
+            if (op.isPresent()) {
+                channel = op.get().toChannel();
+                cache.setChannel(channel);
+            }
+        }
+        return channel;
+    }
+
 
 }

@@ -8,4 +8,5 @@ public class Quotes {
     public static final String CHANNEL_IS_PRIVATE = "CHANNEL_IS_PRIVATE";
     public static final String INCORRECT_LOGIN = "INCORRECT_LOGIN";
     public static final String FORBIDEN_ACCESS = "FORBIDEN_ACCESS";
+    public static final String CHANNEL_EXISTS = "CHANNEL_ALREADY_EXISTS";
 }
