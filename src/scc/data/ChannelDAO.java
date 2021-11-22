@@ -1,7 +1,6 @@
 package scc.data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ChannelDAO {
     private String _rid;
@@ -9,26 +8,26 @@ public class ChannelDAO {
     private String id;
     private String name;
     private String owner;
-    private boolean isPublic;
+    private boolean channelPublic;
     private ArrayList<String> memberIds;
 
     public ChannelDAO() {
     }
 
     public ChannelDAO( Channel c) {
-        this(c.getId(), c.getName(), c.getOwner(), c.isPublic(), c.getMemberIds());
+        this(c.getId(), c.getName(), c.getOwner(), c.isChannelPublic(), c.getMemberIds());
     }
 
     public Channel toChannel(){
-        return new Channel(id,name,owner,isPublic,memberIds!=null ?memberIds: new ArrayList<>(0));
+        return new Channel(id,name,owner, channelPublic,memberIds!=null ?memberIds: new ArrayList<>(0));
     }
 
-    public ChannelDAO(String id, String name,String owner, boolean isPublic, ArrayList<String> memberIds) {
+    public ChannelDAO(String id, String name, String owner, boolean channelPublic, ArrayList<String> memberIds) {
         super();
         this.id = id;
         this.name = name;
         this.owner = owner;
-        this.isPublic = isPublic;
+        this.channelPublic = channelPublic;
         this.memberIds = memberIds;
     }
 
@@ -73,8 +72,8 @@ public class ChannelDAO {
         this.owner = owner;
     }
 
-    public boolean isPublic() {
-        return isPublic;
+    public boolean isChannelPublic() {
+        return channelPublic;
     }
 
     public void addUserToChannel(String id){
@@ -82,7 +81,7 @@ public class ChannelDAO {
     }
 
     public void setIsPublic(boolean isPublic) {
-        this.isPublic = isPublic;
+        this.channelPublic = isPublic;
     }
 
     public ArrayList<String> getMemberIds() {
@@ -100,7 +99,7 @@ public class ChannelDAO {
                 ", _ts='" + _ts + '\'' +
                 ", id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", isPublic=" + isPublic +
+                ", isPublic=" + channelPublic +
                 ", memberIds=" + memberIds.toString() +
                 '}';
     }

@@ -1,21 +1,20 @@
 package scc.data;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Channel {
     private String id;
     private String name;
     private String owner;
-    private boolean isPublic;
+    private boolean channelPublic;
     private ArrayList<String> memberIds;
 
-    public Channel(String id, String name, String owner, boolean isPublic, ArrayList<String> memberIds) {
+    public Channel(String id, String name, String owner, boolean channelPublic, ArrayList<String> memberIds) {
         super();
         this.id = id;
         this.name = name;
         this.owner=owner;
-        this.isPublic = isPublic;
+        this.channelPublic = channelPublic;
         this.memberIds = memberIds;
     }
 
@@ -39,12 +38,12 @@ public class Channel {
         this.name = name;
     }
 
-    public boolean isPublic() {
-        return isPublic;
+    public boolean isChannelPublic() {
+        return channelPublic;
     }
 
     public void setIsPublic(boolean isPublic) {
-        this.isPublic = isPublic;
+        this.channelPublic = isPublic;
     }
 
     public String getOwner() {
@@ -68,7 +67,7 @@ public class Channel {
         return "Channel{" +
                 ", id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", isPublic=" + isPublic +
+                ", isPublic=" + channelPublic +
                 ", memberIds=" + memberIds.toString() +
                 '}';
     }

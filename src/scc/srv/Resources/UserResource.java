@@ -94,7 +94,7 @@ public class UserResource {
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
         } else {
             ChannelDAO c = csmItrC.get();
-            if (c.isPublic()) { // true -> quando o channel e publico
+            if (c.isChannelPublic()) { // true -> quando o channel e publico
                 UserDAO user = db.addChannelToUser(idUser, idChannel).getItem();
                 ChannelDAO channel = db.addUserToChannel(idChannel, idUser).getItem();
                 cache.setUser(user.toUser());
@@ -253,7 +253,7 @@ public class UserResource {
         return user;
     }
 
-    private String getCookie(Cookie session) {
+    public static String getCookie(Cookie session) {
         if (session == null) {
             return "";
         } else {

@@ -1,6 +1,5 @@
 package scc.srv.Resources;
 
-import com.azure.cosmos.util.CosmosPagedIterable;
 import lombok.extern.java.Log;
 import scc.cache.RedisCache;
 import scc.data.Channel;
@@ -12,9 +11,6 @@ import scc.utils.Quotes;
 
 import javax.ws.rs.*;
 
-import scc.cache.Session;
-
-import javax.ws.rs.*;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -78,7 +74,7 @@ public class ChannelResource {
                 cookie = session.getValue();
             }
             ChannelDAO c = csmItrC.get();
-            if (c.isPublic() || (!c.isPublic() && cache.verifySessionCookie(cookie, c.getOwner()))) {
+            if (c.isChannelPublic() || (!c.isChannelPublic() && cache.verifySessionCookie(cookie, c.getOwner()))) {
                 db.addChannelToUser(idUser, idChannel);
                 db.addUserToChannel(idChannel, idUser);
                 return Response.status(Response.Status.OK).build();
@@ -105,7 +101,7 @@ public class ChannelResource {
             }
 
 
-            if (channel.isPublic()) {
+            if (channel.isChannelPublic()) {
                 authorized = true;
             } else {
                 String cookie = "";
@@ -154,7 +150,7 @@ public class ChannelResource {
         if (newChannel.getName() != null || !newChannel.getName().equals("")) {
             c.setName(newChannel.getName());
         }
-        c.setIsPublic(newChannel.isPublic());
+        c.setIsPublic(newChannel.isChannelPublic());
 
         if (newChannel.getMemberIds() != null) {
             c.setMemberIds(newChannel.getMemberIds());

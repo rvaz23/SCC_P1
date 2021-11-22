@@ -11,6 +11,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import scc.data.Channel;
+import scc.data.Message;
 import scc.data.User;
 
 public class RedisCache {
@@ -57,10 +58,7 @@ public class RedisCache {
 	}
 	
 	
-	public String setUser(User user) throws JsonProcessingException {
-		init();
-		return client.set("user:"+user.getId(), mapper.writeValueAsString(user));	
-	}
+
 
 	public String setChannel(Channel channel) throws  JsonProcessingException{
 		init();
@@ -88,7 +86,8 @@ public class RedisCache {
 			return false;
 		}
 	}
-	
+
+	//------------------------------ User --------------------------------
 	public User getUser(String id){
 		init();
 		String res = client.get("user:"+id);
@@ -100,6 +99,11 @@ public class RedisCache {
 		}
 		return user;
 	}
+
+	public String setUser(User user) throws JsonProcessingException {
+		init();
+		return client.set("user:"+user.getId(), mapper.writeValueAsString(user));
+	}
 	
 	public boolean deleteUser(String id) {
 		init();
@@ -110,6 +114,30 @@ public class RedisCache {
 			return false;
 		}
 	}
+
+
+	//------------------------------ Message --------------------------------
+	public String setMessage(Message message) throws JsonProcessingException {
+		init();
+		return client.set("message:"+message.getId(), mapper.writeValueAsString(message));
+	}
+
+	public Message getMessage(String id){
+		init();
+		String res = client.get("message:"+id);
+		Message message;
+		try {
+			message = mapper.readValue(res, Message.class);
+		} catch (Exception e) {
+			return null;
+		}
+		return message;
+	}
+
+
+
+
+	//------------------------------- Auth -----------------------------------
 	
 	public String putSession(Session session) {
 		init();

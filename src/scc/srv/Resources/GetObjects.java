@@ -1,0 +1,39 @@
+package scc.srv.Resources;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import scc.cache.RedisCache;
+import scc.data.*;
+
+import java.util.Optional;
+
+public class GetObjects {
+
+    private static CosmosDBLayer db = CosmosDBLayer.getInstance();
+    private static RedisCache cache = RedisCache.getCachePool();
+
+    public static User getUserIfExists(String idUser) throws JsonProcessingException {
+        User user = cache.getUser(idUser);
+        if(user==null){
+            Optional<UserDAO> op = db.getUserById(idUser).stream().findFirst();
+            if (op.isPresent()) {
+                user = op.get().toUser();
+                cache.setUser(user);
+            }
+        }
+        return user;
+    }
+
+    public static Message getMessageIfExists(String idMessage) throws JsonProcessingException {
+        Message message = cache.getMessage(idMessage);
+        if(message==null){
+            Optional<MessageDAO> op = db.getMessageById(idMessage).stream().findFirst();
+            if (op.isPresent()) {
+                message = op.get().toMessage();
+                cache.setMessage(message);
+            }
+        }
+        return message;
+    }
+
+
+}
