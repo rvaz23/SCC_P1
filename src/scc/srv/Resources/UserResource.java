@@ -107,7 +107,6 @@ public class UserResource {
     }
 
 
-
     /**
      * Get channels associated to user id
      *
@@ -117,37 +116,29 @@ public class UserResource {
     @Path("/{id}/channels")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getChannelsByUserId(@CookieParam("scc:session") Cookie session,
-                                        @PathParam("id") String idUser) {
+                                        @PathParam("id") String idUser) throws JsonProcessingException {
         log.info("getChannelsByUserId Action Requested at User Resource");
 
         String cookie = getCookie(session);
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
+        User user = GetObjects.getUserIfExists(idUser);
+        if (user == null)
+            return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+
         List<String> channelIds;
-        User user;
-        try {
-            user = cache.getUser(idUser);
-            if (user == null) {
-                user = getUserFromDb(idUser).toUser();
-            }
-            if (user == null) {
-                return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
-            }
-            if (cache.verifySessionCookie(cookie, user.getName())) {
-                channelIds = user.getChannelIds();
-                if (channelIds.isEmpty()) {
-                    return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
-                } else {
-                    return Response.status(Response.Status.OK).entity(channelIds).build();
-                }
+
+        if (cache.verifySessionCookie(cookie, user.getName())) {
+            channelIds = user.getChannelIds();
+            if (channelIds.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
             } else {
-                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+                return Response.status(Response.Status.OK).entity(channelIds).build();
             }
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
         }
-        return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
     }
 
     /**
@@ -162,13 +153,10 @@ public class UserResource {
         String cookie = getCookie(session);
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-        User user = cache.getUser(id);
-        if (user == null) {
-            user = getUserFromDb(id).toUser();
-        }
-        if (user == null) {
+        User user = GetObjects.getUserIfExists(id);
+        if (user==null)
             return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
-        }
+
         if (cache.verifySessionCookie(cookie, user.getName())) {
             return Response.status(Response.Status.OK).entity(user).build();
         } else {
