@@ -23,6 +23,19 @@ public class GetObjects {
         return user;
     }
 
+    public static User getUserIfExistsByName(String name) throws JsonProcessingException {
+        //User user = cache.getUser(idUser);
+        User user = null;
+        if(user==null){
+            Optional<UserDAO> op = db.getUserByUsername(name).stream().findFirst();
+            if (op.isPresent()) {
+                user = op.get().toUser();
+                cache.setUser(user);
+            }
+        }
+        return user;
+    }
+
     public static Message getMessageIfExists(String idMessage) throws JsonProcessingException {
         Message message = cache.getMessage(idMessage);
         if(message==null){
