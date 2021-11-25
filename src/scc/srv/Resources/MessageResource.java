@@ -28,7 +28,7 @@ public class MessageResource {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(@CookieParam("scc:session") Cookie session, Message m) throws JsonProcessingException {
-        String cookie = UserResource.getCookie(session);
+        String cookie = GetObjects.getCookie(session);
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         User user = GetObjects.getUserIfExists(m.getSenderId());
@@ -58,7 +58,7 @@ public class MessageResource {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
-        String cookie = UserResource.getCookie(session);
+        String cookie = GetObjects.getCookie(session);
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         Message message = GetObjects.getMessageIfExists(id);

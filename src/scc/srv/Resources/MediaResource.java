@@ -31,8 +31,8 @@ import com.azure.core.util.BinaryData;
 public class MediaResource
 {
 	Map<String,byte[]> map = new HashMap<String,byte[]>();
-	String storageConnectionString = System.getenv("BlobStoreConnection");
-	//String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=rvscc;AccountKey=uxX/JvXipvoolorUtuHCcxrBsEIOg3UhWDHBRJrO1ltPwjd4nOfe2/HZ5P8EygYoxXfqPA9VrVIzSynFs+cpQw==;EndpointSuffix=core.windows.net";
+	//String storageConnectionString = System.getenv("BlobStoreConnection");
+	String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=rvscc;AccountKey=uxX/JvXipvoolorUtuHCcxrBsEIOg3UhWDHBRJrO1ltPwjd4nOfe2/HZ5P8EygYoxXfqPA9VrVIzSynFs+cpQw==;EndpointSuffix=core.windows.net";
 	BlobContainerClient containerClient = new BlobContainerClientBuilder()
 			.connectionString(storageConnectionString)
 			.containerName("images")

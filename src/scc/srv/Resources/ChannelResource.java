@@ -32,10 +32,11 @@ public class ChannelResource {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(@CookieParam("scc:session") Cookie session,Channel channel) throws JsonProcessingException {
-        String cookie = UserResource.getCookie(session);
+        String cookie = GetObjects.getCookie(session);
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-        User user = GetObjects.getUserIfExists(channel.getOwner());
+
+        User user = GetObjects.getUserIfExistsByName(channel.getOwner());
         if (user == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
@@ -75,77 +76,68 @@ public class ChannelResource {
     @PUT
     @Path("/{id}/add/{userId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addUserToChannel(@CookieParam("scc:session") Cookie session, @PathParam("id") String idChannel, @PathParam("userId") String idUser) {
+    public Response addUserToChannel(@CookieParam("scc:session") Cookie session, @PathParam("id") String idChannel, @PathParam("userId") String idUser) throws JsonProcessingException {
         log.info("addUserToChannel Action Requested at Channel Resource");
-        Optional<UserDAO> csmItrU = db.getUserById(idUser).stream().findFirst();
-        Optional<ChannelDAO> csmItrC = db.getChannelById(idChannel).stream().findFirst();
-        String cookie = "";
-        if (csmItrU.isEmpty()) {
+
+        User userToAdd = GetObjects.getUserIfExists(idUser);
+        if (userToAdd == null)
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
-        } else if (csmItrC.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
+
+        Channel channel=GetObjects.getChannelIfExists(idChannel);
+        if (channel == null)
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+
+        if (channel.isChannelPublic()) {
+            db.addChannelToUser(idUser, idChannel);
+            db.addUserToChannel(idChannel, idUser);
+            return Response.status(Response.Status.OK).entity(channel).build();
         } else {
-            if (session != null) {
-                cookie = session.getValue();
-            }
-            ChannelDAO c = csmItrC.get();
-            if (c.isChannelPublic() || (!c.isChannelPublic() && cache.verifySessionCookie(cookie, c.getOwner()))) {
+            User userOwner = GetObjects.getUserIfExistsByName(channel.getOwner());
+            if (userOwner == null)
+                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+            String cookie = GetObjects.getCookie(session);
+            if (cookie.equals(""))
+                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+            if (cache.verifySessionCookie(cookie, userOwner.getName())) {
                 db.addChannelToUser(idUser, idChannel);
                 db.addUserToChannel(idChannel, idUser);
-                return Response.status(Response.Status.OK).build();
-            } else {
-                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+                return Response.status(Response.Status.OK).entity(channel).build();
             }
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
         }
     }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) {
+    public Response getById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
         log.info("getById Action Requested at Channel Resource");
-        boolean authorized = false;
-        Channel channel = cache.getChannel(id);
-        try {
 
-            if (channel == null) {
-                Optional<ChannelDAO> op = db.getChannelById(id).stream().findFirst();
-                if (op.isPresent()) {
-                    channel = op.get().toChannel();
-                }
-            }
+        Channel channel=GetObjects.getChannelIfExists(id);
+        if (channel == null)
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
-
-            if (channel.isChannelPublic()) {
-                authorized = true;
-            } else {
-                String cookie = "";
-                if (session != null) {
-                    cookie = session.getValue();
-                }
-                for (String idU : channel.getMemberIds()) {
-                    User u = cache.getUser(idU);
-                    if (u == null) {
-                        Optional<UserDAO> opU = db.getUserById(id).stream().findFirst();
-                        if (opU.isPresent()) {
-                            u = opU.get().toUser();
-                        }
-                    }
-                    if (cache.verifySessionCookie(cookie, u.getName())) {
-                        authorized = true;
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (authorized) {
+        if (channel.isChannelPublic()) {
             return Response.status(Response.Status.OK).entity(channel).build();
         } else {
+            String cookie = GetObjects.getCookie(session);
+            if (cookie.equals(""))
+                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+            for (String idU : channel.getMemberIds()) {
+                User u  = GetObjects.getUserIfExists(idU);
+                if (cache.verifySessionCookie(cookie, u.getName())) {
+                    return Response.status(Response.Status.OK).entity(channel).build();
+                }
+            }
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         }
+
+
     }
 
     /**

@@ -4,12 +4,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import scc.cache.RedisCache;
 import scc.data.*;
 
+import javax.ws.rs.core.Cookie;
 import java.util.Optional;
 
 public class GetObjects {
 
     private static CosmosDBLayer db = CosmosDBLayer.getInstance();
     private static RedisCache cache = RedisCache.getCachePool();
+
+
+    public static String getCookie(Cookie session) {
+        if (session == null) {
+            return "";
+        } else {
+            return session.getValue();
+        }
+    }
 
     public static User getUserIfExists(String idUser) throws JsonProcessingException {
         User user = cache.getUser(idUser);

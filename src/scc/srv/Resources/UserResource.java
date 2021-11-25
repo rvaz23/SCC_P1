@@ -119,7 +119,7 @@ public class UserResource {
                                         @PathParam("id") String idUser) throws JsonProcessingException {
         log.info("getChannelsByUserId Action Requested at User Resource");
 
-        String cookie = getCookie(session);
+        String cookie = GetObjects.getCookie(session);
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
@@ -150,7 +150,7 @@ public class UserResource {
     public Response getById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
         log.info("getById Action Requested at User Resource");
         // procurar na cache
-        String cookie = getCookie(session);
+        String cookie = GetObjects.getCookie(session);
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         User user = GetObjects.getUserIfExists(id);
@@ -172,7 +172,7 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, User user) throws JsonProcessingException {
-        String cookie = getCookie(session);
+        String cookie = GetObjects.getCookie(session);
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         UserDAO u = getUserFromDb(id);
@@ -200,7 +200,7 @@ public class UserResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
         log.info("deleteById Action Requested at User Resource");
-        String cookie = getCookie(session);
+        String cookie = GetObjects.getCookie(session);
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         UserDAO user = getUserFromDb(id);
@@ -239,14 +239,6 @@ public class UserResource {
             cache.setUser(user.toUser());
         }
         return user;
-    }
-
-    public static String getCookie(Cookie session) {
-        if (session == null) {
-            return "";
-        } else {
-            return session.getValue();
-        }
     }
 
 
