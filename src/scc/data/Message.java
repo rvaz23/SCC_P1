@@ -1,5 +1,10 @@
 package scc.data;
 
+import scc.utils.Hash;
+
+import java.util.Random;
+import java.util.UUID;
+
 public class Message {
     private String id;
     private String senderId;
@@ -18,6 +23,17 @@ public class Message {
         this.repliesToId = repliesToId;
     }
 
+    public Message(String senderId, String channelId, String text, String mediaId) {
+        super();
+        String newId = UUID.randomUUID().toString();
+
+        this.id = newId;
+        this.senderId = senderId;
+        this.channelId = channelId;
+        this.text = text;
+        this.mediaId = mediaId;
+        this.repliesToId = null;
+    }
     public Message() {
 
     }

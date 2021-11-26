@@ -63,15 +63,6 @@ public class UserResource {
             return Response.status(Status.BAD_REQUEST).entity(Quotes.USER_EXISTS).build();
         }
 
-        // adiciona user ao canal
-        for (String id : user.getChannelIds()) {
-            Optional<ChannelDAO> csmItr = db.getChannelById(id).stream().findFirst();
-            if (!csmItr.isEmpty()) {
-                ChannelDAO c = csmItr.get();
-                c.addUserToChannel(user.getId());
-                db.updateChannel(c.getId(), c);
-            }
-        }
         db.putUser(userDAO);
         cache.setUser(userDAO.toUser());
         return Response.status(Response.Status.OK).entity(user).build();

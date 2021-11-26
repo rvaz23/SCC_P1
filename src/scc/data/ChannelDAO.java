@@ -8,8 +8,8 @@ public class ChannelDAO {
     private String id;
     private String name;
     private String owner;
-    private boolean channelPublic;
-    private ArrayList<String> memberIds;
+    private boolean publicChannel;
+    private ArrayList<String> members;
 
     public ChannelDAO() {
     }
@@ -23,7 +23,7 @@ public class ChannelDAO {
     }
 
     public Channel toChannel(){
-        return new Channel(id,name,owner, channelPublic,memberIds!=null ?memberIds: new ArrayList<>(0));
+        return new Channel(id,name,owner, publicChannel,members!=null ?members: new ArrayList<>(0));
     }
 
     public ChannelDAO(String id, String name, String owner, boolean channelPublic, ArrayList<String> memberIds) {
@@ -31,8 +31,8 @@ public class ChannelDAO {
         this.id = id;
         this.name = name;
         this.owner = owner;
-        this.channelPublic = channelPublic;
-        this.memberIds = memberIds;
+        this.publicChannel = channelPublic;
+        this.members = memberIds;
     }
 
 
@@ -77,23 +77,19 @@ public class ChannelDAO {
     }
 
     public boolean isChannelPublic() {
-        return channelPublic;
-    }
-
-    public void addUserToChannel(String id){
-        memberIds.add(id);
+        return publicChannel;
     }
 
     public void setIsPublic(boolean isPublic) {
-        this.channelPublic = isPublic;
+        this.publicChannel = isPublic;
     }
 
     public ArrayList<String> getMemberIds() {
-        return memberIds;
+        return members;
     }
 
     public void setMemberIds(ArrayList<String> memberIds) {
-        this.memberIds = memberIds;
+        this.members = memberIds;
     }
 
     @Override
@@ -103,8 +99,8 @@ public class ChannelDAO {
                 ", _ts='" + _ts + '\'' +
                 ", id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", isPublic=" + channelPublic +
-                ", memberIds=" + memberIds.toString() +
+                ", isPublic=" + publicChannel +
+                ", memberIds=" + members.toString() +
                 '}';
     }
 }

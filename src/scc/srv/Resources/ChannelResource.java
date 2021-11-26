@@ -33,7 +33,7 @@ public class ChannelResource {
         String newId = Hash.of(channel.getName());
 
         Channel exists = GetObjects.getChannelIfExists(newId);
-        if (exists == null)
+        if (exists != null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_EXISTS).build();
 
         if (channel.isChannelPublic()) {
