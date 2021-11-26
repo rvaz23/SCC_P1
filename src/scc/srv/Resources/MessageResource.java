@@ -79,6 +79,36 @@ public class MessageResource {
         //throw new ServiceUnavailableException();
     }
 
+    /**
+     * Delete message by id
+     */
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
+        log.info("deleteById Action Requested at Message Resource");
+        String cookie = GetObjects.getCookie(session);
+        if (cookie.equals(""))
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        MessageDAO message = getMessageFromDb(id);
+        if (message == null)
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.MESSAGE_NOT_FOUND).build();
+
+        User user = GetObjects.getUserIfExists(message.getSenderId());
+        if (user == null)
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.USER_NOT_FOUND).build();
+
+        if (cache.verifySessionCookie(cookie, user.getId())) {
+            if (user.getChannelIds().contains(message.getChannelId())) {
+                db.putMessage(message);
+                cache.setMessage(message.toMessage());
+                return Response.status(Response.Status.OK).entity(message).build();
+            }
+        }
+        return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+    }
+
 
     /**
      * Lists the ids of all messages.
@@ -100,24 +130,7 @@ public class MessageResource {
         }
     }
 
-    /**
-     * Delete message by id
-     */
-    @DELETE
-    @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteById(@PathParam("id") String id) {
-        log.info("deleteById Action Requested at Message Resource");
-        Optional<MessageDAO> op = db.getMessageById(id).stream().findFirst();
-        if (op.isPresent()) {
-            MessageDAO m = op.get();
-            db.delMessage(m);
-            return Response.status(Response.Status.OK).entity(m.toMessage()).build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.MESSAGE_NOT_FOUND).build();
 
-        }
-    }
 
     private boolean verifyMsgExists(String id) {
         if (cache.getMessage(id) != null)
@@ -128,14 +141,14 @@ public class MessageResource {
     }
 
 
-    private UserDAO getUserFromDb(String idUser) throws JsonProcessingException {
-        UserDAO user = null;
-        Optional<UserDAO> op = db.getUserById(idUser).stream().findFirst();
+    private MessageDAO getMessageFromDb(String idMessage) throws JsonProcessingException {
+        MessageDAO message = null;
+        Optional<MessageDAO> op = db.getMessageById(idMessage).stream().findFirst();
         if (op.isPresent()) {
-            user = op.get();
-            cache.setUser(user.toUser());
+            message = op.get();
+            cache.setMessage(message.toMessage());
         }
-        return user;
+        return message;
     }
 
 }
