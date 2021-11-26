@@ -18,7 +18,7 @@ public class ChannelDAO {
     }
 
     public ChannelDAO( Channel c) {
-        this(c.getId(), c.getName(), c.getOwner(), c.isPublicChannel(), c.getMemberIds());
+        this(c.getId(), c.getName(), c.getOwner(), c.isPublicChannel(), c.getMembers());
     }
 
     public ChannelDAO(String id, ChannelCreation c) {
@@ -29,15 +29,14 @@ public class ChannelDAO {
         return new Channel(id,name,owner, publicChannel,members!=null ?members: new ArrayList<>(0));
     }
 
-    public ChannelDAO(String id, String name, String owner, boolean publicChannel, ArrayList<String> memberIds) {
+    public ChannelDAO(String id, String name, String owner, boolean publicChannel, ArrayList<String> members) {
         super();
         this.id = id;
         this.name = name;
         this.owner = owner;
         this.publicChannel = publicChannel;
-        this.members = memberIds;
+        this.members = members;
     }
-
 
     public String get_rid() {
         return _rid;
@@ -87,12 +86,12 @@ public class ChannelDAO {
         this.publicChannel = publicChannel;
     }
 
-    public ArrayList<String> getMemberIds() {
+    public ArrayList<String> getMembers() {
         return members;
     }
 
-    public void setMemberIds(ArrayList<String> memberIds) {
-        this.members = memberIds;
+    public void setMembers(ArrayList<String> members) {
+        this.members = members;
     }
 
     @Override

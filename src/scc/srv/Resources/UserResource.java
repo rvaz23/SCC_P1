@@ -91,8 +91,11 @@ public class UserResource {
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
             if (channel.isPublicChannel()) { // true -> quando o channel e publico
-                UserDAO userChanged=subscribeComputation(idUser, idChannel);
-                return Response.status(Response.Status.OK).entity(userChanged).build();
+                if(!channel.getMembers().contains(idUser)){
+                    UserDAO userChanged=subscribeComputation(idUser, idChannel);
+                    return Response.status(Response.Status.OK).entity(userChanged).build();
+                }
+                return Response.status(Response.Status.OK).entity(user).build();
             }else{
                 User userOwner = GetObjects.getUserIfExistsByName(channel.getOwner());
                 if (userOwner == null)

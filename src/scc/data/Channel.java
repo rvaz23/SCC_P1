@@ -11,13 +11,13 @@ public class Channel {
     private boolean publicChannel;
     private ArrayList<String> members;
 
-    public Channel(String id, String name, String owner, boolean publicChannel, ArrayList<String> memberIds) {
+    public Channel(String id, String name, String owner, boolean publicChannel, ArrayList<String> members) {
         super();
         this.id = id;
         this.name = name;
         this.owner=owner;
         this.publicChannel = publicChannel;
-        this.members = memberIds;
+        this.members = members;
     }
 
     public Channel(){
@@ -40,14 +40,6 @@ public class Channel {
         this.name = name;
     }
 
-    public boolean isPublicChannel() {
-        return publicChannel;
-    }
-
-    public void setIsPublic(boolean isPublic) {
-        this.publicChannel = isPublic;
-    }
-
     public String getOwner() {
         return owner;
     }
@@ -56,12 +48,20 @@ public class Channel {
         this.owner = owner;
     }
 
-    public ArrayList<String> getMemberIds() {
+    public boolean isPublicChannel() {
+        return publicChannel;
+    }
+
+    public void setPublicChannel(boolean publicChannel) {
+        this.publicChannel = publicChannel;
+    }
+
+    public ArrayList<String> getMembers() {
         return members;
     }
 
-    public void setMemberIds(ArrayList<String> memberIds) {
-        this.members = memberIds;
+    public void setMembers(ArrayList<String> members) {
+        this.members = members;
     }
 
     @Override

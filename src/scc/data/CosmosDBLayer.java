@@ -82,7 +82,7 @@ public class CosmosDBLayer {
 	public CosmosItemResponse<ChannelDAO> addUserToChannel(String idChannel,String idUser) {
 		init();
 		PartitionKey key = new PartitionKey( idChannel);
-		return channels.patchItem(idChannel, key, CosmosPatchOperations.create().add("/memberIds/0",idUser), ChannelDAO.class);
+		return channels.patchItem(idChannel, key, CosmosPatchOperations.create().add("/members/0",idUser), ChannelDAO.class);
 	}
 
 	public CosmosItemResponse<ChannelDAO> putChannel(ChannelDAO channel) {

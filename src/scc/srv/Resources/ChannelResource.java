@@ -117,6 +117,10 @@ public class ChannelResource {
     public Response addUserToChannel(@CookieParam("scc:session") Cookie session, @PathParam("id") String idChannel, @PathParam("userId") String idUser) throws JsonProcessingException {
         log.info("addUserToChannel Action Requested at Channel Resource");
 
+        String cookie = GetObjects.getCookie(session);
+        if (cookie.equals(""))
+            return Response.status(Response.Status.FORBIDDEN).entity("no cookie").build();
+
         User userToAdd = GetObjects.getUserIfExists(idUser);
         if (userToAdd == null)
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
@@ -125,32 +129,27 @@ public class ChannelResource {
         if (channel == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
-        if (channel.isPublicChannel()) {
-            addToMembersComputation(idUser, idChannel, userToAdd, channel);
-            return Response.status(Response.Status.OK).entity(channel).build();
-        } else {
-            User userOwner = GetObjects.getUserIfExistsByName(channel.getOwner());
-            if (userOwner == null)
-                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        User userOwner = GetObjects.getUserIfExists(channel.getOwner());
+        if (userOwner == null)
+            return Response.status(Response.Status.FORBIDDEN).entity("Null owner").build();
 
-            String cookie = GetObjects.getCookie(session);
-            if (cookie.equals(""))
-                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
-            if (cache.verifySessionCookie(cookie, userOwner.getId())) {
-                addToMembersComputation(idUser, idChannel, userToAdd, channel);
-                return Response.status(Response.Status.OK).entity(channel).build();
+        if (cache.verifySessionCookie(cookie, userOwner.getId())) {
+            if (!channel.getMembers().contains(idUser)){
+                ChannelDAO channelDAO =addToMembersComputation(idUser, idChannel, userToAdd, channel);
+                return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
             }
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
+            return Response.status(Response.Status.OK).entity(channel).build();
         }
+        return Response.status(Response.Status.FORBIDDEN).entity("Last").build();
+
     }
 
-    private void addToMembersComputation(String idUser, String idChannel, User userToAdd, Channel channel) throws JsonProcessingException {
+    private ChannelDAO addToMembersComputation(String idUser, String idChannel, User userToAdd, Channel channel) throws JsonProcessingException {
         db.addChannelToUser(idUser, idChannel);
-        db.addUserToChannel(idChannel, idUser);
+       ChannelDAO channelDAO = db.addUserToChannel(idChannel, idUser).getItem();
         cache.setUser(userToAdd);
         cache.setChannel(channel);
+        return channelDAO;
     }
 
     @GET
@@ -173,7 +172,7 @@ public class ChannelResource {
             if (cookie.equals(""))
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
-            for (String idU : channel.getMemberIds()) {
+            for (String idU : channel.getMembers()) {
                 User u = GetObjects.getUserIfExists(idU);
                 if (cache.verifySessionCookie(cookie, u.getId())) {
                     return Response.status(Response.Status.OK).entity(channel).build();
@@ -204,8 +203,8 @@ public class ChannelResource {
         }
         c.setPublicChannel(newChannel.isPublicChannel());
 
-        if (newChannel.getMemberIds() != null) {
-            c.setMemberIds(newChannel.getMemberIds());
+        if (newChannel.getMembers() != null) {
+            c.setMembers(newChannel.getMembers());
         }
         db.updateChannel(id, c);
         if (c != null) return Response.status(Response.Status.OK).entity(c.toChannel()).build();
