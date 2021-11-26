@@ -3,11 +3,8 @@ package scc.srv.Resources;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.java.Log;
 import scc.cache.RedisCache;
-import scc.data.Channel;
-import scc.data.ChannelDAO;
-import scc.data.CosmosDBLayer;
-import scc.data.User;
-import scc.data.UserDAO;
+import scc.data.*;
+import scc.utils.Hash;
 import scc.utils.Quotes;
 
 import javax.ws.rs.*;
@@ -31,18 +28,19 @@ public class ChannelResource {
     @POST
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(@CookieParam("scc:session") Cookie session,Channel channel) throws JsonProcessingException {
-        Channel exists = GetObjects.getChannelIfExists(channel.getId());
-        if (exists==null)
+    public Response create(@CookieParam("scc:session") Cookie session, ChannelCreation channel) throws JsonProcessingException {
+
+        String newId = Hash.of(channel.getName());
+
+        Channel exists = GetObjects.getChannelIfExists(newId);
+        if (exists == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_EXISTS).build();
 
-        if(channel.isChannelPublic()){
-            ChannelDAO channelDAO = new ChannelDAO(channel);
-            db.putChannel(channelDAO);
-            cache.setChannel(channelDAO.toChannel());
+        if (channel.isChannelPublic()) {
+            ChannelDAO channelDAO = createComputation(newId, channel);
             log.info("create Action Requested at Channel Resource");
             return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
-        }else{
+        } else {
             String cookie = GetObjects.getCookie(session);
             if (cookie.equals(""))
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
@@ -52,14 +50,19 @@ public class ChannelResource {
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
             if (cache.verifySessionCookie(cookie, user.getId())) {
-                ChannelDAO channelDAO = new ChannelDAO(channel);
-                db.putChannel(channelDAO);
-                cache.setChannel(channelDAO.toChannel());
+                ChannelDAO channelDAO = createComputation(newId, channel);
                 log.info("create Action Requested at Channel Resource");
                 return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
             }
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         }
+    }
+
+    private ChannelDAO createComputation(String newId, ChannelCreation channel) throws JsonProcessingException {
+        ChannelDAO channelDAO = new ChannelDAO(newId, channel);
+        db.putChannel(channelDAO);
+        cache.setChannel(channelDAO.toChannel());
+        return channelDAO;
     }
 
     /**
@@ -68,18 +71,18 @@ public class ChannelResource {
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteById(@CookieParam("scc:session") Cookie session,@PathParam("id") String id) throws JsonProcessingException {
+    public Response deleteById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
         log.info("deleteById Action Requested at Channel Resource");
 
         ChannelDAO channel = getChannelFromDb(id);
-        if (channel==null)
+        if (channel == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
-        if(channel.isChannelPublic()){
+        if (channel.isChannelPublic()) {
             db.delChannelById(channel.getId());
             cache.deleteChannel(channel.getId());
             return Response.status(Response.Status.OK).entity(channel.toChannel()).build();
-        }else{
+        } else {
             String cookie = GetObjects.getCookie(session);
             if (cookie.equals(""))
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
@@ -121,13 +124,12 @@ public class ChannelResource {
         if (userToAdd == null)
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 
-        Channel channel=GetObjects.getChannelIfExists(idChannel);
+        Channel channel = GetObjects.getChannelIfExists(idChannel);
         if (channel == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
         if (channel.isChannelPublic()) {
-            db.addChannelToUser(idUser, idChannel);
-            db.addUserToChannel(idChannel, idUser);
+            addToMembersComputation(idUser, idChannel, userToAdd, channel);
             return Response.status(Response.Status.OK).entity(channel).build();
         } else {
             User userOwner = GetObjects.getUserIfExistsByName(channel.getOwner());
@@ -139,13 +141,19 @@ public class ChannelResource {
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
             if (cache.verifySessionCookie(cookie, userOwner.getId())) {
-                db.addChannelToUser(idUser, idChannel);
-                db.addUserToChannel(idChannel, idUser);
+                addToMembersComputation(idUser, idChannel, userToAdd, channel);
                 return Response.status(Response.Status.OK).entity(channel).build();
             }
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
         }
+    }
+
+    private void addToMembersComputation(String idUser, String idChannel, User userToAdd, Channel channel) throws JsonProcessingException {
+        db.addChannelToUser(idUser, idChannel);
+        db.addUserToChannel(idChannel, idUser);
+        cache.setUser(userToAdd);
+        cache.setChannel(channel);
     }
 
     @GET
@@ -154,7 +162,7 @@ public class ChannelResource {
     public Response getById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
         log.info("getById Action Requested at Channel Resource");
 
-        Channel channel=GetObjects.getChannelIfExists(id);
+        Channel channel = GetObjects.getChannelIfExists(id);
         if (channel == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
@@ -166,7 +174,7 @@ public class ChannelResource {
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
             for (String idU : channel.getMemberIds()) {
-                User u  = GetObjects.getUserIfExists(idU);
+                User u = GetObjects.getUserIfExists(idU);
                 if (cache.verifySessionCookie(cookie, u.getId())) {
                     return Response.status(Response.Status.OK).entity(channel).build();
                 }
@@ -205,6 +213,23 @@ public class ChannelResource {
         //throw new ServiceUnavailableException();
     }
 
+
+    /**
+     * Lists the ids of all channels.
+     */
+    @GET
+    @Path("/{id}/messages")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getMessagesOfChannelWithPagination(@PathParam("id") String idChannel, @QueryParam("st") int offset, @QueryParam("len") int limit) {
+        log.info("getAll Action Requested at Channel Resource");
+
+        List<String> idsMessages = new ArrayList<>();
+
+        for (MessageDAO m : db.getMessages(offset, limit, idChannel)) {
+            idsMessages.add(m.getId());
+        }
+        return Response.status(Response.Status.OK).entity(idsMessages).build();
+    }
 
     /**
      * Lists the ids of all channels.

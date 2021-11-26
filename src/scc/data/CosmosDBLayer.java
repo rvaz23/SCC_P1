@@ -170,6 +170,22 @@ public class CosmosDBLayer {
 		return users.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), UserDAO.class);
 	}
 
+	public CosmosPagedIterable<MessageDAO> getMessages(int offset,int limit, String idChannel) {
+		init();
+		String offString=" OFFSET 0";
+		String limString=" LIMIT 20";
+		if (offset!=0){
+			offString=" OFFSET "+offset;
+		}
+		if (limit!=0){
+			limString=" LIMIT "+limit;
+		}
+
+		String query ="SELECT * FROM messages WHERE channels.id=\"" + idChannel +"\" ORDER BY messages.id "   ;
+		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
+		return messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
+	}
+
 	public void close() {
 		client.close();
 	}

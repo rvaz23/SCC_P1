@@ -18,6 +18,10 @@ public class ChannelDAO {
         this(c.getId(), c.getName(), c.getOwner(), c.isChannelPublic(), c.getMemberIds());
     }
 
+    public ChannelDAO(String id, ChannelCreation c) {
+        this(id, c.getName(), c.getOwner(), c.isChannelPublic(), c.getMemberIds());
+    }
+
     public Channel toChannel(){
         return new Channel(id,name,owner, channelPublic,memberIds!=null ?memberIds: new ArrayList<>(0));
     }
