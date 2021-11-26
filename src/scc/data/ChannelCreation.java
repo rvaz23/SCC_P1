@@ -1,11 +1,14 @@
 package scc.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 
 public class ChannelCreation {
 
     private String name;
     private String owner;
+    @JsonProperty
     private boolean publicChannel;
     private ArrayList<String> members;
 

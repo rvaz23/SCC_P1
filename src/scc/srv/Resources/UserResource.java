@@ -79,7 +79,7 @@ public class UserResource {
 
         String cookie = GetObjects.getCookie(session);
         if (cookie.equals(""))
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+            return Response.status(Response.Status.FORBIDDEN).entity("82").build();
 
         User user = GetObjects.getUserIfExists(idUser);
         if (user == null)
@@ -96,15 +96,15 @@ public class UserResource {
             }else{
                 User userOwner = GetObjects.getUserIfExistsByName(channel.getOwner());
                 if (userOwner == null)
-                    return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+                    return Response.status(Response.Status.FORBIDDEN).entity("99").build();
                 if(idUser.equals(userOwner.getId())){
                     UserDAO userChanged=subscribeComputation(idUser, idChannel);
                     return Response.status(Response.Status.OK).entity(userChanged).build();
                 }
-                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+                return Response.status(Response.Status.FORBIDDEN).entity("104").build();
             }
         }
-        return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        return Response.status(Response.Status.FORBIDDEN).entity("107").build();
     }
 
     private UserDAO subscribeComputation(String idUser, String idChannel) throws JsonProcessingException {

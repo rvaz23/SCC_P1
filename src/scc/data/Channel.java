@@ -1,5 +1,7 @@
 package scc.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 
 public class Channel {
@@ -9,12 +11,12 @@ public class Channel {
     private boolean publicChannel;
     private ArrayList<String> members;
 
-    public Channel(String id, String name, String owner, boolean channelPublic, ArrayList<String> memberIds) {
+    public Channel(String id, String name, String owner, boolean publicChannel, ArrayList<String> memberIds) {
         super();
         this.id = id;
         this.name = name;
         this.owner=owner;
-        this.publicChannel = channelPublic;
+        this.publicChannel = publicChannel;
         this.members = memberIds;
     }
 

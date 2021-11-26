@@ -9,9 +9,9 @@ import com.azure.cosmos.models.*;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
 public class CosmosDBLayer {
-	private static final String CONNECTION_URL = "https://scc52656db.documents.azure.com:443/";//System.getenv("COSMOSDB_URL");//;
-	private static final String DB_KEY = "ERc01dQzrml0sg2xw6VETFPOpATzAq6QcexlLOF6PXPRkbHFLu0dHWy57yyEBfPVwDLJ3Auiv0AQRLU4gb2RyQ==";//System.getenv("COSMOSDB_KEY");//;
-	private static final String DB_NAME = "scc52656db";//System.getenv("COSMOSDB_DATABASE");//
+	private static final String CONNECTION_URL = System.getenv("COSMOSDB_URL");//;
+	private static final String DB_KEY = System.getenv("COSMOSDB_KEY");//;
+	private static final String DB_NAME = System.getenv("COSMOSDB_DATABASE");//
 	
 	private static CosmosDBLayer instance;
 

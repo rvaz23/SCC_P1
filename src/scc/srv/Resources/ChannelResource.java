@@ -36,7 +36,7 @@ public class ChannelResource {
         if (exists != null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_EXISTS).build();
 
-        if (channel.isChannelPublic()) {
+        if (channel.isPublicChannel()) {
             ChannelDAO channelDAO = createComputation(newId, channel);
             log.info("create Action Requested at Channel Resource");
             return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
@@ -78,7 +78,7 @@ public class ChannelResource {
         if (channel == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
-        if (channel.isChannelPublic()) {
+        if (channel.isPublicChannel()) {
             db.delChannelById(channel.getId());
             cache.deleteChannel(channel.getId());
             return Response.status(Response.Status.OK).entity(channel.toChannel()).build();
@@ -163,6 +163,9 @@ public class ChannelResource {
         log.info("getById Action Requested at Channel Resource");
 
         Channel channel = GetObjects.getChannelIfExists(id);
+        if (channel!=null)
+        return Response.status(Response.Status.OK).entity(channel).build();
+
         if (channel == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
@@ -202,7 +205,7 @@ public class ChannelResource {
         if (newChannel.getName() != null || !newChannel.getName().equals("")) {
             c.setName(newChannel.getName());
         }
-        c.setIsPublic(newChannel.isChannelPublic());
+        c.setPublicChannel(newChannel.isChannelPublic());
 
         if (newChannel.getMemberIds() != null) {
             c.setMemberIds(newChannel.getMemberIds());

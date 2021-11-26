@@ -1,5 +1,7 @@
 package scc.data;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.ArrayList;
 
 public class ChannelDAO {
@@ -8,6 +10,7 @@ public class ChannelDAO {
     private String id;
     private String name;
     private String owner;
+
     private boolean publicChannel;
     private ArrayList<String> members;
 
@@ -19,19 +22,19 @@ public class ChannelDAO {
     }
 
     public ChannelDAO(String id, ChannelCreation c) {
-        this(id, c.getName(), c.getOwner(), c.isChannelPublic(), c.getMemberIds());
+        this(id, c.getName(), c.getOwner(), c.isPublicChannel(), c.getMembers());
     }
 
     public Channel toChannel(){
         return new Channel(id,name,owner, publicChannel,members!=null ?members: new ArrayList<>(0));
     }
 
-    public ChannelDAO(String id, String name, String owner, boolean channelPublic, ArrayList<String> memberIds) {
+    public ChannelDAO(String id, String name, String owner, boolean publicChannel, ArrayList<String> memberIds) {
         super();
         this.id = id;
         this.name = name;
         this.owner = owner;
-        this.publicChannel = channelPublic;
+        this.publicChannel = publicChannel;
         this.members = memberIds;
     }
 
@@ -76,12 +79,12 @@ public class ChannelDAO {
         this.owner = owner;
     }
 
-    public boolean isChannelPublic() {
+    public boolean isPublicChannel() {
         return publicChannel;
     }
 
-    public void setIsPublic(boolean isPublic) {
-        this.publicChannel = isPublic;
+    public void setPublicChannel(boolean publicChannel) {
+        this.publicChannel = publicChannel;
     }
 
     public ArrayList<String> getMemberIds() {
