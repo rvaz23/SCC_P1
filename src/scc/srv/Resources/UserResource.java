@@ -26,12 +26,12 @@ public class UserResource {
     @POST
     @Path("/auth")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response auth(Login user) {
+    public Response auth(Login user) throws JsonProcessingException {
         boolean pwdOk = false;
         // Check pwd
-        Optional<UserDAO> userD = db.getUserByUsername(user.getUser()).stream().findFirst();
-        if (userD.isPresent()) {
-            if (userD.get().getPwd().equals(user.getPwd()))
+        User usr = GetObjects.getUserIfExists(user.getUser());
+        if (usr!=null) {
+            if (usr.getPwd().equals(user.getPwd()))
                 pwdOk = true;
         }
 
@@ -129,7 +129,7 @@ public class UserResource {
 
         List<String> channelIds;
 
-        if (cache.verifySessionCookie(cookie, user.getName())) {
+        if (cache.verifySessionCookie(cookie, user.getId())) {
             channelIds = user.getChannelIds();
             if (channelIds.isEmpty()) {
                 return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
@@ -157,7 +157,7 @@ public class UserResource {
         if (user==null)
             return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 
-        if (cache.verifySessionCookie(cookie, user.getName())) {
+        if (cache.verifySessionCookie(cookie, user.getId())) {
             return Response.status(Response.Status.OK).entity(user).build();
         } else {
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
@@ -177,7 +177,7 @@ public class UserResource {
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         UserDAO u = getUserFromDb(id);
         if (u != null) {
-            if (cache.verifySessionCookie(cookie, u.getName())) {
+            if (cache.verifySessionCookie(cookie, u.getId())) {
                 if (user.getName() != null || !user.getName().equals("")) {
                     u.setName(user.getName());
                 }
@@ -205,7 +205,7 @@ public class UserResource {
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         UserDAO user = getUserFromDb(id);
         if (user != null) {
-            if (cache.verifySessionCookie(cookie, user.getName())) {
+            if (cache.verifySessionCookie(cookie, user.getId())) {
                 db.delUser(user);
                 cache.deleteUser(id);
                 return Response.status(Response.Status.OK).entity(user.toUser()).build();

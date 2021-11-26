@@ -40,7 +40,7 @@ public class ChannelResource {
         if (user == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
-        if (cache.verifySessionCookie(cookie, user.getName())) {
+        if (cache.verifySessionCookie(cookie, user.getId())) {
             Channel exists = GetObjects.getChannelIfExists(channel.getId());
             if (exists==null)
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_EXISTS).build();

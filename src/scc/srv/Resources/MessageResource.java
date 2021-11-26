@@ -35,7 +35,7 @@ public class MessageResource {
         if (user == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
-        if (cache.verifySessionCookie(cookie, user.getName())) {
+        if (cache.verifySessionCookie(cookie, user.getId())) {
             if (user.getChannelIds().contains(m.getChannelId())) {
                 if (verifyMsgExists(m.getRepliesToId())) {
                     log.info("create Action Requested at Message Resource");
@@ -69,7 +69,7 @@ public class MessageResource {
         if (user == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
-        if (cache.verifySessionCookie(cookie, user.getName())) {
+        if (cache.verifySessionCookie(cookie, user.getId())) {
             log.info("getById Action Requested at Message Resource");
             return Response.status(Response.Status.OK).entity(message).build();
         }
