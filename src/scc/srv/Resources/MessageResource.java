@@ -31,13 +31,13 @@ public class MessageResource {
         String cookie = GetObjects.getCookie(session);
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-        User user = GetObjects.getUserIfExists(m.getSenderId());
+        User user = GetObjects.getUserIfExists(m.getUser());
         if (user == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
-            if (user.getChannelIds().contains(m.getChannelId())) {
-                if (verifyMsgExists(m.getRepliesToId())) {
+            if (user.getChannelIds().contains(m.getChannel())) {
+                if (verifyMsgExists(m.getReplyTo())) {
                     log.info("create Action Requested at Message Resource");
                     MessageDAO messageDAO = new MessageDAO(m);
                     db.putMessage(messageDAO);
@@ -65,7 +65,7 @@ public class MessageResource {
         if (message == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
-        User user = GetObjects.getUserIfExists(message.getSenderId());
+        User user = GetObjects.getUserIfExists(message.getUser());
         if (user == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
@@ -95,7 +95,7 @@ public class MessageResource {
         if (message == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.MESSAGE_NOT_FOUND).build();
 
-        User user = GetObjects.getUserIfExists(message.getSenderId());
+        User user = GetObjects.getUserIfExists(message.getUser());
         if (user == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.USER_NOT_FOUND).build();
 

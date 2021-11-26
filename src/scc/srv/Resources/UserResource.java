@@ -71,7 +71,7 @@ public class UserResource {
     /**
      * Add user with Id to channel with Id
      */
-    @PUT
+    @POST
     @Path("/{id}/subscribe/{channelId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response addChannelToUser(@CookieParam("scc:session") Cookie session,@PathParam("id") String idUser, @PathParam("channelId") String idChannel) throws JsonProcessingException {

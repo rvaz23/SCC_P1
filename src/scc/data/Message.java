@@ -1,26 +1,23 @@
 package scc.data;
 
-import scc.utils.Hash;
-
-import java.util.Random;
 import java.util.UUID;
 
 public class Message {
     private String id;
-    private String senderId;
-    private String channelId;
+    private String user;
+    private String channel;
     private String text;
-    private String mediaId;
-    private String repliesToId;
+    private String imageId;
+    private String replyTo;
 
     public Message(String id, String senderId, String channelId, String text, String mediaId, String repliesToId) {
         super();
         this.id = id;
-        this.senderId = senderId;
-        this.channelId = channelId;
+        this.user = senderId;
+        this.channel = channelId;
         this.text = text;
-        this.mediaId = mediaId;
-        this.repliesToId = repliesToId;
+        this.imageId = mediaId;
+        this.replyTo = repliesToId;
     }
 
     public Message(String senderId, String channelId, String text, String mediaId) {
@@ -28,11 +25,11 @@ public class Message {
         String newId = UUID.randomUUID().toString();
 
         this.id = newId;
-        this.senderId = senderId;
-        this.channelId = channelId;
+        this.user = senderId;
+        this.channel = channelId;
         this.text = text;
-        this.mediaId = mediaId;
-        this.repliesToId = null;
+        this.imageId = mediaId;
+        this.replyTo = null;
     }
     public Message() {
 
@@ -46,20 +43,20 @@ public class Message {
         this.id = id;
     }
 
-    public String getSenderId() {
-        return senderId;
+    public String getUser() {
+        return user;
     }
 
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
+    public void setUser(String user) {
+        this.user = user;
     }
 
-    public String getChannelId() {
-        return channelId;
+    public String getChannel() {
+        return channel;
     }
 
-    public void setChannelId(String channelId) {
-        this.channelId = channelId;
+    public void setChannel(String channel) {
+        this.channel = channel;
     }
 
     public String getText() {
@@ -70,31 +67,31 @@ public class Message {
         this.text = text;
     }
 
-    public String getMediaId() {
-        return mediaId;
+    public String getImageId() {
+        return imageId;
     }
 
-    public void setMediaId(String mediaId) {
-        this.mediaId = mediaId;
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
     }
 
-    public String getRepliesToId() {
-        return repliesToId;
+    public String getReplyTo() {
+        return replyTo;
     }
 
-    public void setRepliesToId(String repliesToId) {
-        this.repliesToId = repliesToId;
+    public void setReplyTo(String replyTo) {
+        this.replyTo = replyTo;
     }
 
     @Override
     public String toString() {
         return "Message{" +
                 "id='" + id + '\'' +
-                ", senderId='" + senderId + '\'' +
-                ", channelId='" + channelId + '\'' +
+                ", senderId='" + user + '\'' +
+                ", channelId='" + channel + '\'' +
                 ", text='" + text + '\'' +
-                ", mediaId='" + mediaId + '\'' +
-                ", repliesToId='" + repliesToId + '\'' +
+                ", mediaId='" + imageId + '\'' +
+                ", repliesToId='" + replyTo + '\'' +
                 '}';
     }
 }

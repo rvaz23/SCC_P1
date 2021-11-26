@@ -1,36 +1,34 @@
 package scc.data;
 
-import java.util.Arrays;
-
 public class MessageDAO {
     private String _rid;
     private String _ts;
     private String id;
-    private String senderId;
-    private String channelId;
+    private String user;
+    private String channel;
     private String text;
-    private String mediaId;
-    private String repliesToId;
+    private String imageId;
+    private String replyTo;
 
     public MessageDAO() {
     }
 
     public MessageDAO( Message m) {
-        this(m.getId(), m.getSenderId(), m.getChannelId(), m.getText(), m.getMediaId(), m.getRepliesToId());
+        this(m.getId(), m.getUser(), m.getChannel(), m.getText(), m.getImageId(), m.getReplyTo());
     }
 
     public Message toMessage() {
-        return new Message(id,senderId,channelId,text,mediaId!=null ? mediaId :"", repliesToId!=null ? repliesToId :"");
+        return new Message(id, user,channel,text, imageId !=null ? imageId :"", replyTo !=null ? replyTo :"");
     }
 
     public MessageDAO(String id, String senderId, String channelId, String text, String mediaId, String repliesToId) {
         super();
         this.id = id;
-        this.senderId = senderId;
-        this.channelId = channelId;
+        this.user = senderId;
+        this.channel = channelId;
         this.text = text;
-        this.mediaId = mediaId;
-        this.repliesToId = repliesToId;
+        this.imageId = mediaId;
+        this.replyTo = repliesToId;
     }
 
     public String get_rid() {
@@ -57,20 +55,20 @@ public class MessageDAO {
         this.id = id;
     }
 
-    public String getSenderId() {
-        return senderId;
+    public String getUser() {
+        return user;
     }
 
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
+    public void setUser(String user) {
+        this.user = user;
     }
 
     public String getChannelId() {
-        return channelId;
+        return channel;
     }
 
     public void setChannelId(String channelId) {
-        this.channelId = channelId;
+        this.channel = channelId;
     }
 
     public String getText() {
@@ -81,20 +79,20 @@ public class MessageDAO {
         this.text = text;
     }
 
-    public String getMediaId() {
-        return mediaId;
+    public String getImageId() {
+        return imageId;
     }
 
-    public void setMediaId(String mediaId) {
-        this.mediaId = mediaId;
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
     }
 
-    public String getRepliesToId() {
-        return repliesToId;
+    public String getReplyTo() {
+        return replyTo;
     }
 
-    public void setRepliesToId(String repliesToId) {
-        this.repliesToId = repliesToId;
+    public void setReplyTo(String replyTo) {
+        this.replyTo = replyTo;
     }
 
     @Override
@@ -103,11 +101,11 @@ public class MessageDAO {
                 "_rid='" + _rid + '\'' +
                 ", _ts='" + _ts + '\'' +
                 ", id='" + id + '\'' +
-                ", senderId='" + senderId + '\'' +
-                ", channelId='" + channelId + '\'' +
+                ", senderId='" + user + '\'' +
+                ", channelId='" + channel + '\'' +
                 ", text='" + text + '\'' +
-                ", mediaId='" + mediaId + '\'' +
-                ", repliesToId='" + repliesToId + '\'' +
+                ", mediaId='" + imageId + '\'' +
+                ", repliesToId='" + replyTo + '\'' +
                 '}';
     }
 }
