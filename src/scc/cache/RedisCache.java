@@ -18,6 +18,7 @@ public class RedisCache {
 
 	private static final String RedisHostname = System.getenv("REDIS_URL");
 	private static final String RedisKey = System.getenv("REDIS_KEY");
+	private static final boolean cacheUse = Boolean.parseBoolean(System.getenv("USE_CACHE"));
 	//private static final String RedisHostname = "lab152656.redis.cache.windows.net";
 	//private static final String RedisKey = "3cTDiucqBEL39BHdJZyyW44mqDtP6IUZFAzCaMWf8PM=";
 	
@@ -61,11 +62,15 @@ public class RedisCache {
 
 
 	public String setChannel(Channel channel) throws  JsonProcessingException{
+		if (!cacheUse)
+			return null;
 		init();
 		return client.set("channel:"+ channel.getId(), mapper.writeValueAsString(channel));
 	}
 
 	public Channel getChannel(String id){
+		if (!cacheUse)
+			return null;
 		init();
 		String res= client.get("channel:"+id);
 		Channel channel;
@@ -78,6 +83,8 @@ public class RedisCache {
 	}
 
 	public boolean deleteChannel(String id){
+		if (!cacheUse)
+			return false;
 		init();
 		long deleted = client.del("channel:"+id);
 		if(deleted>0){
@@ -89,6 +96,8 @@ public class RedisCache {
 
 	//------------------------------ User --------------------------------
 	public User getUser(String id){
+		if(!cacheUse)
+			return null;
 		init();
 		String res = client.get("user:"+id);
 		User user;
@@ -101,11 +110,15 @@ public class RedisCache {
 	}
 
 	public String setUser(User user) throws JsonProcessingException {
+		if (!cacheUse)
+			return null;
 		init();
 		return client.set("user:"+user.getId(), mapper.writeValueAsString(user));
 	}
 	
 	public boolean deleteUser(String id) {
+		if (!cacheUse)
+			return false;
 		init();
 		long deleted =client.del("user:"+id);
 		if (deleted>0) {
@@ -118,11 +131,15 @@ public class RedisCache {
 
 	//------------------------------ Message --------------------------------
 	public String setMessage(Message message) throws JsonProcessingException {
+		if (!cacheUse)
+			return null;
 		init();
 		return client.set("message:"+message.getId(), mapper.writeValueAsString(message));
 	}
 
 	public Message getMessage(String id){
+		if (!cacheUse)
+			return null;
 		init();
 		String res = client.get("message:"+id);
 		Message message;
