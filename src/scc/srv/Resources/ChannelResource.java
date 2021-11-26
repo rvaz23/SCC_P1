@@ -51,6 +51,7 @@ public class ChannelResource {
 
             if (cache.verifySessionCookie(cookie, user.getId())) {
                 ChannelDAO channelDAO = createComputation(newId, channel);
+                addToMembersComputation(user.getId(),newId,user,channelDAO.toChannel());
                 log.info("create Action Requested at Channel Resource");
                 return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
             }
@@ -62,6 +63,7 @@ public class ChannelResource {
         ChannelDAO channelDAO = new ChannelDAO(newId, channel);
         db.putChannel(channelDAO);
         cache.setChannel(channelDAO.toChannel());
+
         return channelDAO;
     }
 
