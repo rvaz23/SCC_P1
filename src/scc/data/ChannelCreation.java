@@ -6,15 +6,15 @@ public class ChannelCreation {
 
     private String name;
     private String owner;
-    private boolean channelPublic;
-    private ArrayList<String> memberIds;
+    private boolean publicChannel;
+    private ArrayList<String> members;
 
-    public ChannelCreation(String name, String owner, boolean channelPublic, ArrayList<String> memberIds) {
+    public ChannelCreation(String name, String owner, boolean publicChannel, ArrayList<String> members) {
         super();
         this.name = name;
         this.owner=owner;
-        this.channelPublic = channelPublic;
-        this.memberIds = memberIds;
+        this.publicChannel = publicChannel;
+        this.members = members;
     }
 
     public ChannelCreation(){
@@ -30,12 +30,12 @@ public class ChannelCreation {
         this.name = name;
     }
 
-    public boolean isChannelPublic() {
-        return channelPublic;
+    public boolean isPublicChannel() {
+        return publicChannel;
     }
 
     public void setIsPublic(boolean isPublic) {
-        this.channelPublic = isPublic;
+        this.publicChannel = isPublic;
     }
 
     public String getOwner() {
@@ -46,20 +46,20 @@ public class ChannelCreation {
         this.owner = owner;
     }
 
-    public ArrayList<String> getMemberIds() {
-        return memberIds;
+    public ArrayList<String> getMembers() {
+        return members;
     }
 
-    public void setMemberIds(ArrayList<String> memberIds) {
-        this.memberIds = memberIds;
+    public void setMembers(ArrayList<String> members) {
+        this.members = members;
     }
 
     @Override
     public String toString() {
         return "ChannelCreation{" +
                 ", name='" + name + '\'' +
-                ", isPublic=" + channelPublic +
-                ", memberIds=" + memberIds.toString() +
+                ", isPublic=" + publicChannel +
+                ", memberIds=" + members.toString() +
                 '}';
     }
 }
