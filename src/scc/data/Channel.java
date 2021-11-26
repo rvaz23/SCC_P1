@@ -40,7 +40,7 @@ public class Channel {
         this.name = name;
     }
 
-    public boolean isChannelPublic() {
+    public boolean isPublicChannel() {
         return publicChannel;
     }
 

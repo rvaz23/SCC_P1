@@ -90,7 +90,7 @@ public class UserResource {
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
-            if (channel.isChannelPublic()) { // true -> quando o channel e publico
+            if (channel.isPublicChannel()) { // true -> quando o channel e publico
                 UserDAO userChanged=subscribeComputation(idUser, idChannel);
                 return Response.status(Response.Status.OK).entity(userChanged).build();
             }else{

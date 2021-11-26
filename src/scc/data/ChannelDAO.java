@@ -18,7 +18,7 @@ public class ChannelDAO {
     }
 
     public ChannelDAO( Channel c) {
-        this(c.getId(), c.getName(), c.getOwner(), c.isChannelPublic(), c.getMemberIds());
+        this(c.getId(), c.getName(), c.getOwner(), c.isPublicChannel(), c.getMemberIds());
     }
 
     public ChannelDAO(String id, ChannelCreation c) {
