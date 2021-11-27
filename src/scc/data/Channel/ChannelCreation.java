@@ -8,7 +8,6 @@ public class ChannelCreation {
 
     private String name;
     private String owner;
-    @JsonProperty
     private boolean publicChannel;
     private ArrayList<String> members;
 

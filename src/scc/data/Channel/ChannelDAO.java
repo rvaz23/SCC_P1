@@ -1,6 +1,7 @@
 package scc.data.Channel;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class ChannelDAO {
     private String _rid;
@@ -19,8 +20,8 @@ public class ChannelDAO {
         this(c.getId(), c.getName(), c.getOwner(), c.isPublicChannel(), c.getMembers());
     }
 
-    public ChannelDAO(String id, ChannelCreation c) {
-        this(id, c.getName(), c.getOwner(), c.isPublicChannel(), c.getMembers());
+    public ChannelDAO(ChannelCreation c) {
+        this(UUID.randomUUID().toString(), c.getName(), c.getOwner(), c.isPublicChannel(), c.getMembers());
     }
 
     public Channel toChannel(){

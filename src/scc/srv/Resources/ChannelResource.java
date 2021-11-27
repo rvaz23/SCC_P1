@@ -35,12 +35,11 @@ public class ChannelResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(@CookieParam("scc:session") Cookie session, ChannelCreation channel) throws JsonProcessingException {
 
-        String newId = Hash.of(channel.getName());
-
+        /*
         Channel exists = GetObjects.getChannelIfExists(newId);
         if (exists != null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_EXISTS).build();
-
+*/
         User user = GetObjects.getUserIfExists(channel.getOwner());
         if (user == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
@@ -50,8 +49,9 @@ public class ChannelResource {
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
-            ChannelDAO channelDAO = createComputation(newId, channel);
-            addToMembersComputation(user.getId(),newId,user,channelDAO.toChannel());
+            ChannelDAO channelDAO = createComputation(channel);
+
+            addToMembersComputation(user.getId(), channelDAO.getId(), user,channelDAO.toChannel());
             log.info("create Action Requested at Channel Resource");
             return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
         }
@@ -59,8 +59,8 @@ public class ChannelResource {
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
     }
 
-    private ChannelDAO createComputation(String newId, ChannelCreation channel) throws JsonProcessingException {
-        ChannelDAO channelDAO = new ChannelDAO(newId, channel);
+    private ChannelDAO createComputation(ChannelCreation channel) throws JsonProcessingException {
+        ChannelDAO channelDAO = new ChannelDAO(channel);
         db.putChannel(channelDAO);
         cache.setChannel(channelDAO.toChannel());
 
