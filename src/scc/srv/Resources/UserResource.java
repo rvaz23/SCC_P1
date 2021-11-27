@@ -102,7 +102,7 @@ public class UserResource {
                 }
                 return Response.status(Response.Status.OK).entity(user).build();
             }else{
-                User userOwner = GetObjects.getUserIfExistsByName(channel.getOwner());
+                User userOwner = GetObjects.getUserIfExists(channel.getOwner());
                 if (userOwner == null)
                     return Response.status(Response.Status.FORBIDDEN).entity("99").build();
                 if(idUser.equals(userOwner.getId())){
@@ -111,8 +111,9 @@ public class UserResource {
                 }
                 return Response.status(Response.Status.FORBIDDEN).entity("104").build();
             }
+        }else{
+            return Response.status(Response.Status.FORBIDDEN).entity("107").build();
         }
-        return Response.status(Response.Status.FORBIDDEN).entity("107").build();
     }
 
     private UserDAO subscribeComputation(String idUser, String idChannel) throws JsonProcessingException {

@@ -42,7 +42,7 @@ public class ChannelResource {
 */
         User user = GetObjects.getUserIfExists(channel.getOwner());
         if (user == null)
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 
         String cookie = GetObjects.getCookie(session);
         if (cookie.equals(""))
@@ -54,9 +54,9 @@ public class ChannelResource {
             addToMembersComputation(user.getId(), channelDAO.getId(), user,channelDAO.toChannel());
             log.info("create Action Requested at Channel Resource");
             return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
-        }
-
+        }else{
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        }
     }
 
     private ChannelDAO createComputation(ChannelCreation channel) throws JsonProcessingException {
@@ -144,9 +144,9 @@ public class ChannelResource {
                 return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
             }
             return Response.status(Response.Status.OK).entity(channel).build();
+        }else{
+            return Response.status(Response.Status.FORBIDDEN).entity("Last").build();
         }
-        return Response.status(Response.Status.FORBIDDEN).entity("Last").build();
-
     }
 
     private ChannelDAO addToMembersComputation(String idUser, String idChannel, User userToAdd, Channel channel) throws JsonProcessingException {
@@ -164,8 +164,6 @@ public class ChannelResource {
         log.info("getById Action Requested at Channel Resource");
 
         Channel channel = GetObjects.getChannelIfExists(id);
-        if (channel!=null)
-        return Response.status(Response.Status.OK).entity(channel).build();
 
         if (channel == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
