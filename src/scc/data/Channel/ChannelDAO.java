@@ -1,6 +1,4 @@
-package scc.data;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+package scc.data.Channel;
 
 import java.util.ArrayList;
 

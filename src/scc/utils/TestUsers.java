@@ -7,7 +7,7 @@ import com.azure.cosmos.models.CosmosItemResponse;
 import com.azure.cosmos.util.CosmosPagedIterable;
 
 import scc.data.CosmosDBLayer;
-import scc.data.UserDAO;
+import scc.data.User.UserDAO;
 
 /**
  * Standalone program for accessing the database

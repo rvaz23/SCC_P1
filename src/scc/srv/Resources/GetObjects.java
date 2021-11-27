@@ -3,6 +3,12 @@ package scc.srv.Resources;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import scc.cache.RedisCache;
 import scc.data.*;
+import scc.data.Channel.Channel;
+import scc.data.Channel.ChannelDAO;
+import scc.data.Message.Message;
+import scc.data.Message.MessageDAO;
+import scc.data.User.User;
+import scc.data.User.UserDAO;
 
 import javax.ws.rs.core.Cookie;
 import java.util.Optional;

@@ -1,18 +1,14 @@
 package scc.cache;
 
-import com.azure.cosmos.CosmosClient;
-import com.azure.cosmos.CosmosContainer;
-import com.azure.cosmos.CosmosDatabase;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import scc.data.Channel;
-import scc.data.Message;
-import scc.data.User;
+import scc.data.Channel.Channel;
+import scc.data.Message.Message;
+import scc.data.User.User;
 
 public class RedisCache {
 

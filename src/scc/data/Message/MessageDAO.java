@@ -1,4 +1,6 @@
-package scc.data;
+package scc.data.Message;
+
+import scc.data.Message.Message;
 
 public class MessageDAO {
     private String _rid;

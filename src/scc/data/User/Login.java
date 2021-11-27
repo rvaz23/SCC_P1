@@ -1,4 +1,4 @@
-package scc.data;
+package scc.data.User;
 
 public class Login {
 

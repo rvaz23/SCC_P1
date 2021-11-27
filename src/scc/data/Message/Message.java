@@ -1,4 +1,7 @@
-package scc.data;
+package scc.data.Message;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.UUID;
 
@@ -7,30 +10,28 @@ public class Message {
     private String user;
     private String channel;
     private String text;
-    private String imageId;
-    private String replyTo;
+    private String imageId="";
+    private String replyTo="";
 
-    public Message(String id, String senderId, String channelId, String text, String mediaId, String repliesToId) {
+
+    @JsonCreator
+    public Message(@JsonProperty("id")String id,@JsonProperty("user") String senderId,@JsonProperty("channel") String channelId,@JsonProperty("text") String text
+            ,@JsonProperty("imageId") String mediaId,@JsonProperty("replyTo") String repliesToId) {
         super();
-        this.id = id;
+        if (id!=null){
+            this.id = id;
+        }else{
+            this.id=UUID.randomUUID().toString();
+        }
         this.user = senderId;
         this.channel = channelId;
         this.text = text;
+        if (mediaId!=null)
         this.imageId = mediaId;
+        if (repliesToId!=null)
         this.replyTo = repliesToId;
     }
 
-    public Message(String senderId, String channelId, String text, String mediaId) {
-        super();
-        String newId = UUID.randomUUID().toString();
-
-        this.id = newId;
-        this.user = senderId;
-        this.channel = channelId;
-        this.text = text;
-        this.imageId = mediaId;
-        this.replyTo = null;
-    }
     public Message() {
 
     }

@@ -4,6 +4,11 @@ import lombok.extern.java.Log;
 import scc.cache.RedisCache;
 import scc.cache.Session;
 import scc.data.*;
+import scc.data.Channel.Channel;
+import scc.data.Channel.ChannelDAO;
+import scc.data.User.Login;
+import scc.data.User.User;
+import scc.data.User.UserDAO;
 import scc.utils.Quotes;
 
 import javax.ws.rs.*;

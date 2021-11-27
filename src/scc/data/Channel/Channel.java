@@ -1,4 +1,4 @@
-package scc.data;
+package scc.data.Channel;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

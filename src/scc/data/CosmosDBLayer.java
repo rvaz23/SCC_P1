@@ -7,6 +7,9 @@ import com.azure.cosmos.CosmosContainer;
 import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.*;
 import com.azure.cosmos.util.CosmosPagedIterable;
+import scc.data.Channel.ChannelDAO;
+import scc.data.Message.MessageDAO;
+import scc.data.User.UserDAO;
 
 public class CosmosDBLayer {
 	private static final String CONNECTION_URL = System.getenv("COSMOSDB_URL");//;
@@ -79,7 +82,7 @@ public class CosmosDBLayer {
 	//------------------------------Channels------------------------------
 
 
-	public CosmosItemResponse<ChannelDAO> addUserToChannel(String idChannel,String idUser) {
+	public CosmosItemResponse<ChannelDAO> addUserToChannel(String idChannel, String idUser) {
 		init();
 		PartitionKey key = new PartitionKey( idChannel);
 		return channels.patchItem(idChannel, key, CosmosPatchOperations.create().add("/members/0",idUser), ChannelDAO.class);

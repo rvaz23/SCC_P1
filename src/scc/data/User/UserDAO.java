@@ -1,7 +1,8 @@
-package scc.data;
+package scc.data.User;
+
+import scc.data.User.User;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Represents a User, as stored in the database

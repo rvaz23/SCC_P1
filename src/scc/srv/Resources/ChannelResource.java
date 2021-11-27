@@ -4,6 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.java.Log;
 import scc.cache.RedisCache;
 import scc.data.*;
+import scc.data.Channel.Channel;
+import scc.data.Channel.ChannelCreation;
+import scc.data.Channel.ChannelDAO;
+import scc.data.Message.MessageDAO;
+import scc.data.User.User;
 import scc.utils.Hash;
 import scc.utils.Quotes;
 

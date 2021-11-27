@@ -5,6 +5,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.java.Log;
 import scc.cache.RedisCache;
 import scc.data.*;
+import scc.data.Message.Message;
+import scc.data.Message.MessageDAO;
+import scc.data.User.User;
 import scc.utils.Quotes;
 
 import javax.ws.rs.*;
@@ -16,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Log
-@Path("/message")
+@Path("/messages")
 public class MessageResource {
     CosmosDBLayer db = CosmosDBLayer.getInstance();
     RedisCache cache = RedisCache.getCachePool();
@@ -37,7 +40,7 @@ public class MessageResource {
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
             if (user.getChannelIds().contains(m.getChannel())) {
-                if (verifyMsgExists(m.getReplyTo())) {
+                if (verifyMsgExists(m.getReplyTo()) || m.getReplyTo().equals("")) {
                     log.info("create Action Requested at Message Resource");
                     MessageDAO messageDAO = new MessageDAO(m);
                     db.putMessage(messageDAO);
