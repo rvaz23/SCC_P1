@@ -75,9 +75,18 @@ public class CosmosDBLayer {
 		return messages.queryItems("SELECT * FROM messages WHERE messages.id=\"" + id + "\"", new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
 
-	public CosmosPagedIterable<MessageDAO> getMessages() {
+	public CosmosPagedIterable<MessageDAO> getMessages(int offset, int limit) {
 		init();
-		return messages.queryItems("SELECT * FROM messages ", new CosmosQueryRequestOptions(), MessageDAO.class);
+        String offString=" OFFSET 0";
+        String limString=" LIMIT 20";
+        if (offset!=0){
+            offString=" OFFSET "+offset;
+        }
+        if (limit!=0){
+            limString=" LIMIT "+limit;
+        }
+        String query = "SELECT * FROM messages"
+        return channels.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
 	//------------------------------Channels------------------------------
 
@@ -94,9 +103,18 @@ public class CosmosDBLayer {
 	}
 
 
-	public CosmosPagedIterable<ChannelDAO> getChannels() {
+	public CosmosPagedIterable<ChannelDAO> getChannels(int offset, int limit) {
 		init();
-		return channels.queryItems("SELECT * FROM channels ", new CosmosQueryRequestOptions(), ChannelDAO.class);
+        String offString=" OFFSET 0";
+        String limString=" LIMIT 20";
+        if (offset!=0){
+            offString=" OFFSET "+offset;
+        }
+        if (limit!=0){
+            limString=" LIMIT "+limit;
+        }
+        String query = "SELECT * FROM channels"
+        return channels.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), ChannelDAO.class);
 	}
 
 	public CosmosPagedIterable<ChannelDAO> getChannelById( String id) {
