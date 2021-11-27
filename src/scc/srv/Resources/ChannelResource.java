@@ -35,11 +35,9 @@ public class ChannelResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(@CookieParam("scc:session") Cookie session, ChannelCreation channel) throws JsonProcessingException {
 
-        /*
-        Channel exists = GetObjects.getChannelIfExists(newId);
-        if (exists != null)
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_EXISTS).build();
-*/
+        if (db.getChannelById(channel.getId()).stream().count() > 0) {
+            return Response.status(Status.BAD_REQUEST).entity(Quotes.CHANNEL_EXISTS).build();
+        }
         User user = GetObjects.getUserIfExists(channel.getOwner());
         if (user == null)
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
@@ -196,23 +194,25 @@ public class ChannelResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response UpdateById(@PathParam("id") String id, Channel newChannel) {
-        log.info("updateById Action Requested at Channel Resource");
-        ChannelDAO c = db.getChannelById(id).stream().findFirst().get();
-        if (newChannel.getId() != null || !newChannel.getId().equals("")) {
-            c.setId(newChannel.getId());
-        }
-        if (newChannel.getName() != null || !newChannel.getName().equals("")) {
-            c.setName(newChannel.getName());
-        }
-        c.setPublicChannel(newChannel.isPublicChannel());
+        try {
+            log.info("updateById Action Requested at Channel Resource");
+            ChannelDAO c = db.getChannelById(id).stream().findFirst().get();
+            if (newChannel.getId() != null || !newChannel.getId().equals("")) {
+                c.setId(newChannel.getId());
+            }
+            if (newChannel.getName() != null || !newChannel.getName().equals("")) {
+                c.setName(newChannel.getName());
+            }
+            c.setPublicChannel(newChannel.isPublicChannel());
 
-        if (newChannel.getMembers() != null) {
-            c.setMembers(newChannel.getMembers());
-        }
-        db.updateChannel(id, c);
-        if (c != null) return Response.status(Response.Status.OK).entity(c.toChannel()).build();
-        else return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
-        //throw new ServiceUnavailableException();
+            if (newChannel.getMembers() != null) {
+                c.setMembers(newChannel.getMembers());
+            }
+            db.updateChannel(id, c);
+            if (c != null) return Response.status(Response.Status.OK).entity(c.toChannel()).build();
+            else return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
+
+        }catch () throw new ServiceUnavailableException();
     }
 
 
