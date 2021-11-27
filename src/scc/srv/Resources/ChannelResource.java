@@ -166,7 +166,7 @@ public class ChannelResource {
         Channel channel = GetObjects.getChannelIfExists(id);
 
         if (channel == null)
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
         if (channel.isPublicChannel()) {
             return Response.status(Response.Status.OK).entity(channel).build();
@@ -222,15 +222,42 @@ public class ChannelResource {
     @GET
     @Path("/{id}/messages")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getMessagesOfChannelWithPagination(@PathParam("id") String idChannel, @QueryParam("st") int offset, @QueryParam("len") int limit) {
+    public Response getMessagesOfChannelWithPagination(@CookieParam("scc:session") Cookie session, @PathParam("id") String idChannel, @QueryParam("st") int offset, @QueryParam("len") int limit) throws JsonProcessingException {
         log.info("getAll Action Requested at Channel Resource");
 
+        Channel channel = GetObjects.getChannelIfExists(idChannel);
+
+        if (channel == null)
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
+
+        if (channel.isPublicChannel()) {
+            List<String> idsMessages = getMessagesOfChannelComputation(offset, limit, idChannel);
+            Response.status(Response.Status.OK).entity(idsMessages).build();
+        }else{
+            String cookie = GetObjects.getCookie(session);
+            if (cookie.equals(""))
+                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+            for (String idU : channel.getMembers()) {
+                User u = GetObjects.getUserIfExists(idU);
+                if (cache.verifySessionCookie(cookie, u.getId())) {
+                    List<String> idsMessages = getMessagesOfChannelComputation(offset, limit, idChannel);
+                    Response.status(Response.Status.OK).entity(idsMessages).build();
+                }
+            }
+        }
+
+        return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+    }
+
+    public List<String> getMessagesOfChannelComputation(int offset, int limit, String idChannel){
         List<String> idsMessages = new ArrayList<>();
 
         for (MessageDAO m : db.getMessages(offset, limit, idChannel)) {
             idsMessages.add(m.getId());
         }
-        return Response.status(Response.Status.OK).entity(idsMessages).build();
+        return idsMessages;
     }
 
     /**
