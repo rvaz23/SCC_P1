@@ -266,11 +266,11 @@ public class ChannelResource {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAll() {
+    public Response getAll(@QueryParam("st") int offset, @QueryParam("len") int limit) {
         log.info("getAll Action Requested at Channel Resource");
         List<String> ids = new ArrayList<>();
 
-        for (ChannelDAO c : db.getChannels()) {
+        for (ChannelDAO c : db.getChannels(offset, limit)) {
             ids.add(c.getId());
         }
         if (!ids.isEmpty()) return Response.status(Response.Status.OK).entity(ids).build();

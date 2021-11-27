@@ -119,11 +119,11 @@ public class MessageResource {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAll() {
+    public Response getAll(@QueryParam("st") int offset, @QueryParam("len") int limit) {
         log.info("getAll Action Requested at Message Resource");
         List<String> ids = new ArrayList<>();
 
-        for (MessageDAO m : db.getMessages()) {
+        for (MessageDAO m : db.getMessages(offset, limit)) {
             ids.add(m.getId());
         }
         if (!ids.isEmpty()) {
