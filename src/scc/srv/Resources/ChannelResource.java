@@ -7,8 +7,10 @@ import scc.data.*;
 import scc.data.Channel.Channel;
 import scc.data.Channel.ChannelCreation;
 import scc.data.Channel.ChannelDAO;
+import scc.data.Message.Message;
 import scc.data.Message.MessageDAO;
 import scc.data.User.User;
+import scc.data.User.UserDAO;
 import scc.utils.Quotes;
 
 import javax.ws.rs.*;
@@ -46,7 +48,7 @@ public class ChannelResource {
         if (cache.verifySessionCookie(cookie, user.getId())) {
             ChannelDAO channelDAO = createComputation(channel);
 
-            addToMembersComputation(user.getId(), channelDAO.getId(), user,channelDAO.toChannel());
+            addToMembersComputation(user.getId(), channelDAO.getId());
             log.info("create Action Requested at Channel Resource");
             return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
         }else{
@@ -135,7 +137,7 @@ public class ChannelResource {
 
         if (cache.verifySessionCookie(cookie, userOwner.getId())) {
             if (!channel.getMembers().contains(idUser)){
-                ChannelDAO channelDAO =addToMembersComputation(idUser, idChannel, userToAdd, channel);
+                ChannelDAO channelDAO =addToMembersComputation(idUser, idChannel);
                 return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
             }
             return Response.status(Response.Status.OK).entity(channel).build();
@@ -144,11 +146,11 @@ public class ChannelResource {
         }
     }
 
-    private ChannelDAO addToMembersComputation(String idUser, String idChannel, User userToAdd, Channel channel) throws JsonProcessingException {
-        db.addChannelToUser(idUser, idChannel);
+    private ChannelDAO addToMembersComputation(String idUser, String idChannel) throws JsonProcessingException {
+        UserDAO userDAO = db.addChannelToUser(idUser, idChannel).getItem();
         ChannelDAO channelDAO = db.addUserToChannel(idChannel, idUser).getItem();
-        cache.setUser(userToAdd);
-        cache.setChannel(channel);
+        cache.setUser(userDAO.toUser());
+        cache.setChannel(channelDAO.toChannel());
         return channelDAO;
     }
 
@@ -263,8 +265,8 @@ public class ChannelResource {
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
         if (channel.isPublicChannel()) {
-            List<String> idsMessages = getMessagesOfChannelComputation(offset, limit, idChannel);
-            return Response.status(Response.Status.OK).entity(idsMessages).build();
+            List<Message> messages = getMessagesOfChannelComputation(offset, limit, idChannel);
+            return Response.status(Response.Status.OK).entity(messages).build();
         }else{
             String cookie = GetObjects.getCookie(session);
             if (cookie.equals(""))
@@ -273,11 +275,11 @@ public class ChannelResource {
             for (String idU : channel.getMembers()) {
                 User u = GetObjects.getUserIfExists(idU);
                 if (u!=null && cache.verifySessionCookie(cookie, u.getId())) {
-                    List<String> idsMessages = getMessagesOfChannelComputation(offset, limit, idChannel);
-                    if(idsMessages==null){
+                    List<Message> messages = getMessagesOfChannelComputation(offset, limit, idChannel);
+                    if(messages.isEmpty()){
                         return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
                     }
-                    return Response.status(Response.Status.OK).entity(idsMessages).build();
+                    return Response.status(Response.Status.OK).entity(messages).build();
                 }
             }
         }
@@ -286,13 +288,13 @@ public class ChannelResource {
 
     }
 
-    public List<String> getMessagesOfChannelComputation(int offset, int limit, String idChannel){
-        List<String> idsMessages = new ArrayList<>();
+    public List<Message> getMessagesOfChannelComputation(int offset, int limit, String idChannel){
+        List<Message> messages = new ArrayList<>();
 
         for (MessageDAO m : db.getMessages(offset, limit, idChannel)) {
-            idsMessages.add(m.getId());
+            messages.add(m.toMessage());
         }
-        return idsMessages;
+        return messages;
     }
 
     /**
