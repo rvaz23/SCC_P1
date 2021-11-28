@@ -202,7 +202,7 @@ public class CosmosDBLayer {
 			limString=" LIMIT "+limit;
 		}
 
-		String query ="SELECT * FROM messages WHERE channels.id=\"" + idChannel +"\" ORDER BY messages.id "   ;
+		String query ="SELECT * FROM messages WHERE messages.channelId=\"" + idChannel +"\" ORDER BY messages.id "   ;
 		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
 		return messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
 	}

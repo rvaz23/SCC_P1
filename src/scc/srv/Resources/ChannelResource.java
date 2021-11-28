@@ -25,7 +25,7 @@ import java.util.Optional;
 public class ChannelResource {
     CosmosDBLayer db = CosmosDBLayer.getInstance();
     RedisCache cache = RedisCache.getCachePool();
-    CognitiveSearch cogSearch= CognitiveSearch.getInstance();
+    CognitiveSearch cogSearch;//= CognitiveSearch.getInstance();
 
     /**
      * Post a new channel.The id of the channel is its hash.
