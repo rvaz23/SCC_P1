@@ -46,17 +46,22 @@
       <groupId>org.jboss.resteasy</groupId>  
       <artifactId>resteasy-servlet-initializer</artifactId>  
       <version>4.7.2.Final</version> 
-    </dependency>  
-   <!-- <dependency>
-      <groupId>com.microsoft.azure</groupId>  
-      <artifactId>azure-storage</artifactId>  
-      <version>8.6.6</version> 
-    </dependency>-->
-    <dependency> 
-      <groupId>com.azure</groupId>  
-      <artifactId>azure-storage-blob</artifactId>  
-      <version>12.14.0</version> 
-    </dependency>  
+    </dependency>
+    <dependency>
+      <groupId>com.microsoft.azure</groupId>
+      <artifactId>azure-storage</artifactId>
+      <version>8.6.6</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-core</artifactId>
+      <version>1.20.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-blob</artifactId>
+      <version>12.14.0</version>
+    </dependency>
     <dependency> 
       <groupId>com.azure</groupId>  
       <artifactId>azure-cosmos</artifactId>  

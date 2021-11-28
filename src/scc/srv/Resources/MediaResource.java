@@ -1,8 +1,13 @@
 package scc.srv.Resources;
 
+import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobItem;
 import scc.utils.Hash;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +16,6 @@ import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -22,7 +26,6 @@ import javax.ws.rs.core.MediaType;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobContainerClientBuilder;
-import com.azure.core.util.BinaryData;
 
 /**
  * Resource for managing media files, such as images.
@@ -51,10 +54,10 @@ public class MediaResource
 
 		// Upload contents from BinaryData (check documentation for other alternatives)
 		if(!blob.exists()){
-		BinaryData binaryData = BinaryData.fromBytes(contents);
-		blob.upload(binaryData);
+			InputStream stream = new ByteArrayInputStream(contents);
+			//BinaryData binaryData = BinaryData.fromBytes(contents);
+			blob.upload(stream,contents.length);
 		}
-
 			return key;
 	}
 
@@ -68,8 +71,14 @@ public class MediaResource
 	public byte[] download(@PathParam("id") String id) {
 		BlobClient blob = containerClient.getBlobClient(id);
 		if (blob.exists()){
-			BinaryData data = blob.downloadContent();
-			return data.toBytes();
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			blob.download(outputStream);
+
+			//converting it to the inputStream to return
+			final byte[] bytes = outputStream.toByteArray();
+			//BinaryData data = blob.downloadContent();
+			//return data.toBytes();
+			return bytes;
 		}
 		//TODO: complete !
 		throw new ServiceUnavailableException();
