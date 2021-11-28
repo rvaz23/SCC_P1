@@ -33,7 +33,7 @@ public class MessageResource {
     public Response create(@CookieParam("scc:session") Cookie session, Message m) throws JsonProcessingException {
         String cookie = GetObjects.getCookie(session);
         if (db.getMessageById(m.getId()).stream().count() > 0) {
-            return Response.status(Status.BAD_REQUEST).entity(Quotes.MESSAGE_EXISTS).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(Quotes.MESSAGE_EXISTS).build();
         }
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
