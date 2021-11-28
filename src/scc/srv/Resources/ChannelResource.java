@@ -27,7 +27,7 @@ import java.util.Optional;
 public class ChannelResource {
     CosmosDBLayer db = CosmosDBLayer.getInstance();
     RedisCache cache = RedisCache.getCachePool();
-    CognitiveSearch cogSearch;//= CognitiveSearch.getInstance();
+    CognitiveSearch cogSearch = CognitiveSearch.getInstance();
 
     /**
      * Post a new channel.The id of the channel is its hash.
@@ -226,7 +226,7 @@ public class ChannelResource {
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
         if (channel.isPublicChannel()) {
-            findByWordMsgComputation(expression, idChannel);
+            return findByWordMsgComputation(expression, idChannel);
         }else{
             String cookie = GetObjects.getCookie(session);
             if (cookie.equals(""))
@@ -235,7 +235,7 @@ public class ChannelResource {
             for (String idU : channel.getMembers()) {
                 User u = GetObjects.getUserIfExists(idU);
                 if (u!=null && cache.verifySessionCookie(cookie, u.getId())) {
-                    findByWordMsgComputation(expression, idChannel);
+                    return findByWordMsgComputation(expression, idChannel);
                 }
             }
         }
