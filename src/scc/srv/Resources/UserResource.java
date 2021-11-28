@@ -39,6 +39,9 @@ public class UserResource {
             if (usr.getPwd().equals(user.getPwd()))
                 pwdOk = true;
         }
+        if (usr==null){
+            Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND);
+        }
 
         if (pwdOk) {
             String uid = UUID.randomUUID().toString();
