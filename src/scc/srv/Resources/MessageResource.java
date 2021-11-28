@@ -141,7 +141,7 @@ public class MessageResource {
     private boolean verifyMsgExists(String id) {
         if (cache.getMessage(id) != null)
             return true;
-        if (db.getUserById(id).stream().count() > 0)
+        if (db.getMessageById(id).stream().count() > 0)
             return true;
         return false;
     }
