@@ -7,6 +7,7 @@ import scc.data.*;
 import scc.data.Channel.Channel;
 import scc.data.Channel.ChannelCreation;
 import scc.data.Channel.ChannelDAO;
+import scc.data.Garbage.Garbage;
 import scc.data.Message.Message;
 import scc.data.Message.MessageDAO;
 import scc.data.User.User;
@@ -51,7 +52,7 @@ public class ChannelResource {
             addToMembersComputation(user.getId(), channelDAO.getId());
             log.info("create Action Requested at Channel Resource");
             return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
-        }else{
+        } else {
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         }
     }
@@ -77,26 +78,22 @@ public class ChannelResource {
         if (channel == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
-        if (channel.isPublicChannel()) {
+        String cookie = GetObjects.getCookie(session);
+        if (cookie.equals(""))
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        User user = GetObjects.getUserIfExists(channel.getOwner());
+        if (user == null)
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        if (cache.verifySessionCookie(cookie, user.getId())) {
             db.delChannelById(channel.getId());
             cache.deleteChannel(channel.getId());
+            db.putGarbage(new Garbage("CHANNEL", channel.getId()));
             return Response.status(Response.Status.OK).entity(channel.toChannel()).build();
-        } else {
-            String cookie = GetObjects.getCookie(session);
-            if (cookie.equals(""))
-                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
-            User user = GetObjects.getUserIfExists(channel.getOwner());
-            if (user == null)
-                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
-            if (cache.verifySessionCookie(cookie, user.getId())) {
-                db.delChannelById(channel.getId());
-                cache.deleteChannel(channel.getId());
-                return Response.status(Response.Status.OK).entity(channel.toChannel()).build();
-            }
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         }
+        return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
     }
 
     private ChannelDAO getChannelFromDb(String idChannel) throws JsonProcessingException {
@@ -136,12 +133,12 @@ public class ChannelResource {
             return Response.status(Response.Status.FORBIDDEN).entity("Null owner").build();
 
         if (cache.verifySessionCookie(cookie, userOwner.getId())) {
-            if (!channel.getMembers().contains(idUser)){
-                ChannelDAO channelDAO =addToMembersComputation(idUser, idChannel);
+            if (!channel.getMembers().contains(idUser)) {
+                ChannelDAO channelDAO = addToMembersComputation(idUser, idChannel);
                 return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
             }
             return Response.status(Response.Status.OK).entity(channel).build();
-        }else{
+        } else {
             return Response.status(Response.Status.FORBIDDEN).entity("Last").build();
         }
     }
@@ -174,7 +171,7 @@ public class ChannelResource {
 
             for (String idU : channel.getMembers()) {
                 User u = GetObjects.getUserIfExists(idU);
-                if (u!=null && cache.verifySessionCookie(cookie, u.getId())) {
+                if (u != null && cache.verifySessionCookie(cookie, u.getId())) {
                     return Response.status(Response.Status.OK).entity(channel).build();
                 }
             }
@@ -211,7 +208,7 @@ public class ChannelResource {
             if (c != null) return Response.status(Response.Status.OK).entity(c.toChannel()).build();
             else return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new ServiceUnavailableException();
         }
     }
@@ -227,14 +224,14 @@ public class ChannelResource {
 
         if (channel.isPublicChannel()) {
             return findByWordMsgComputation(expression, idChannel);
-        }else{
+        } else {
             String cookie = GetObjects.getCookie(session);
             if (cookie.equals(""))
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
             for (String idU : channel.getMembers()) {
                 User u = GetObjects.getUserIfExists(idU);
-                if (u!=null && cache.verifySessionCookie(cookie, u.getId())) {
+                if (u != null && cache.verifySessionCookie(cookie, u.getId())) {
                     return findByWordMsgComputation(expression, idChannel);
                 }
             }
@@ -242,11 +239,11 @@ public class ChannelResource {
         return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
     }
 
-    private Response findByWordMsgComputation(String expression, String idChannel){
-        List<String> foundMessages = cogSearch.findMessagesWithWordInChannel(expression,idChannel);
-        if(foundMessages!=null || foundMessages.size()>0){
+    private Response findByWordMsgComputation(String expression, String idChannel) {
+        List<String> foundMessages = cogSearch.findMessagesWithWordInChannel(expression, idChannel);
+        if (foundMessages != null || foundMessages.size() > 0) {
             return Response.status(Response.Status.OK).entity(foundMessages).build();
-        }else{
+        } else {
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.EXPRESSION_NOT_FOUND).build();
         }
     }
@@ -267,16 +264,16 @@ public class ChannelResource {
         if (channel.isPublicChannel()) {
             List<Message> messages = getMessagesOfChannelComputation(offset, limit, idChannel);
             return Response.status(Response.Status.OK).entity(messages).build();
-        }else{
+        } else {
             String cookie = GetObjects.getCookie(session);
             if (cookie.equals(""))
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
             for (String idU : channel.getMembers()) {
                 User u = GetObjects.getUserIfExists(idU);
-                if (u!=null && cache.verifySessionCookie(cookie, u.getId())) {
+                if (u != null && cache.verifySessionCookie(cookie, u.getId())) {
                     List<Message> messages = getMessagesOfChannelComputation(offset, limit, idChannel);
-                    if(messages.isEmpty()){
+                    if (messages.isEmpty()) {
                         return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
                     }
                     return Response.status(Response.Status.OK).entity(messages).build();
@@ -288,7 +285,7 @@ public class ChannelResource {
 
     }
 
-    public List<Message> getMessagesOfChannelComputation(int offset, int limit, String idChannel){
+    public List<Message> getMessagesOfChannelComputation(int offset, int limit, String idChannel) {
         List<Message> messages = new ArrayList<>();
 
         for (MessageDAO m : db.getMessages(offset, limit, idChannel)) {

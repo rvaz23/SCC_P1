@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.java.Log;
 import scc.cache.RedisCache;
 import scc.data.*;
+import scc.data.Garbage.Garbage;
 import scc.data.Message.Message;
 import scc.data.Message.MessageDAO;
 import scc.data.User.User;
@@ -109,6 +110,7 @@ public class MessageResource {
             if (user.getChannelIds().contains(message.getChannelId())) {
                 db.putMessage(message);
                 cache.setMessage(message.toMessage());
+                db.putGarbage(new Garbage("MESSAGE", message.getId()));
                 return Response.status(Response.Status.OK).entity(message).build();
             }
         }
