@@ -100,6 +100,12 @@ public class CosmosDBLayer {
 		return channels.patchItem(idChannel, key, CosmosPatchOperations.create().add("/members/0",idUser), ChannelDAO.class);
 	}
 
+    public CosmosItemResponse<ChannelDAO> removeUserFromChannel(String idChannel, String idUser) {
+        init();
+        PartitionKey key = new PartitionKey( idChannel);
+        return channels.patchItem(idChannel, key, CosmosPatchOperations.create().remove("/members/" + idUser), ChannelDAO.class);
+    }
+
 	public CosmosItemResponse<ChannelDAO> putChannel(ChannelDAO channel) {
 		init();
 		return channels.createItem(channel);
@@ -162,6 +168,12 @@ public class CosmosDBLayer {
 		PartitionKey key = new PartitionKey( idUser);
 		return users.patchItem(idUser, key, CosmosPatchOperations.create().add("/channelIds/0",idChannel), UserDAO.class);
 	}
+
+    public CosmosItemResponse<UserDAO> removeChannelFromUser(String idUser,String idChannel) {
+        init();
+        PartitionKey key = new PartitionKey( idUser);
+        return users.patchItem(idUser, key, CosmosPatchOperations.create().remove("/channelIds/" + idChannel), UserDAO.class);
+    }
 
     public CosmosItemResponse<UserDAO> updateUser(String id,UserDAO user) {
         init();
