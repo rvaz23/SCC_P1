@@ -151,6 +151,51 @@ public class ChannelResource {
         return channelDAO;
     }
 
+
+    /**
+     * Remove user from channel
+     */
+    @POST
+    @Path("/{id}/remove/{userId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response removeUserFromChannel(@CookieParam("scc:session") Cookie session, @PathParam("id") String idChannel, @PathParam("userId") String idUser) throws JsonProcessingException {
+        log.info("removeUserFromChannel Action Requested at Channel Resource");
+
+        String cookie = GetObjects.getCookie(session);
+        if (cookie.equals(""))
+            return Response.status(Response.Status.FORBIDDEN).entity("no cookie").build();
+
+        User userToRemove = GetObjects.getUserIfExists(idUser);
+        if (userToRemove == null)
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+
+        Channel channel = GetObjects.getChannelIfExists(idChannel);
+        if (channel == null)
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
+
+        User userOwner = GetObjects.getUserIfExists(channel.getOwner());
+        if (userOwner == null)
+            return Response.status(Response.Status.FORBIDDEN).entity("Null owner").build();
+
+        if (cache.verifySessionCookie(cookie, userOwner.getId())) {
+            if (!channel.getMembers().contains(idUser)){
+                ChannelDAO channelDAO =removeFromMembersComputation(idUser, idChannel);
+                return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
+            }
+            return Response.status(Response.Status.OK).entity(channel).build();
+        }else{
+            return Response.status(Response.Status.FORBIDDEN).entity("Last").build();
+        }
+    }
+
+    private ChannelDAO removeFromMembersComputation(String idUser, String idChannel) throws JsonProcessingException {
+        UserDAO userDAO = db.removeChannelFromUser(idUser, idChannel).getItem();
+        ChannelDAO channelDAO = db.removeUserFromChannel(idChannel, idUser).getItem();
+        cache.setUser(userDAO.toUser());
+        cache.setChannel(channelDAO.toChannel());
+        return channelDAO;
+    }
+
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
