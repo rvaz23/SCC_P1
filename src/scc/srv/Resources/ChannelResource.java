@@ -189,11 +189,26 @@ public class ChannelResource {
     }
 
     private ChannelDAO removeFromMembersComputation(String idUser, String idChannel) throws JsonProcessingException {
-        UserDAO userDAO = db.removeChannelFromUser(idUser, idChannel).getItem();
-        ChannelDAO channelDAO = db.removeUserFromChannel(idChannel, idUser).getItem();
-        cache.setUser(userDAO.toUser());
-        cache.setChannel(channelDAO.toChannel());
-        return channelDAO;
+        Optional<UserDAO> optional = db.getUserById(idUser).stream().findFirst();
+        if (optional.isPresent()){
+            UserDAO user = optional.get();
+            ArrayList<String> channels =user.getChannelIds();
+            channels.remove(idChannel);
+            user.setChannelIds(channels);
+            db.updateUser(idUser,user);
+            cache.setUser(user.toUser());
+        }
+        Optional<ChannelDAO> optional1 = db.getChannelById(idChannel).stream().findFirst();
+        if (optional1.isPresent()){
+            ChannelDAO channel = optional1.get();
+            ArrayList<String> users = channel.getMembers();
+            users.remove(idUser);
+            channel.setMembers(users);
+            db.updateChannel(idChannel,channel);
+            cache.setChannel(channel.toChannel());
+            return  channel;
+        }
+        return null;
     }
 
     @GET

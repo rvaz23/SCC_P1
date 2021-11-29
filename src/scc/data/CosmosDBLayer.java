@@ -171,7 +171,7 @@ public class CosmosDBLayer {
 
     public CosmosItemResponse<UserDAO> removeChannelFromUser(String idUser,String idChannel) {
         init();
-        PartitionKey key = new PartitionKey( idUser);
+        PartitionKey key = new PartitionKey(idUser);
         return users.patchItem(idUser, key, CosmosPatchOperations.create().remove("/channelIds/" + idChannel), UserDAO.class);
     }
 
