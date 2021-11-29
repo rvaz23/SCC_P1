@@ -171,20 +171,20 @@ public class ChannelResource {
 
         Channel channel = GetObjects.getChannelIfExists(idChannel);
         if (channel == null)
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
         User userOwner = GetObjects.getUserIfExists(channel.getOwner());
         if (userOwner == null)
             return Response.status(Response.Status.FORBIDDEN).entity("Null owner").build();
 
         if (cache.verifySessionCookie(cookie, userOwner.getId())) {
-            if (!channel.getMembers().contains(idUser)){
+            if (channel.getMembers().contains(idUser)){
                 ChannelDAO channelDAO =removeFromMembersComputation(idUser, idChannel);
                 return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
             }
             return Response.status(Response.Status.OK).entity(channel).build();
         }else{
-            return Response.status(Response.Status.FORBIDDEN).entity("Last").build();
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         }
     }
 
