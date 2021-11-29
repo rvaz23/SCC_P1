@@ -89,7 +89,7 @@ public class CosmosDBLayer {
             limString=" LIMIT "+limit;
         }
         String query = "SELECT * FROM messages";
-        return channels.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
+        return messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
 	//------------------------------Channels------------------------------
 
