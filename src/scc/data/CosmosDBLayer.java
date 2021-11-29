@@ -8,6 +8,7 @@ import com.azure.cosmos.CosmosDatabase;
 import com.azure.cosmos.models.*;
 import com.azure.cosmos.util.CosmosPagedIterable;
 import scc.data.Channel.ChannelDAO;
+import scc.data.Garbage.Garbage;
 import scc.data.Message.MessageDAO;
 import scc.data.User.UserDAO;
 
@@ -40,7 +41,8 @@ public class CosmosDBLayer {
 	private CosmosContainer users;
 	private CosmosContainer messages;
 	private CosmosContainer channels;
-	
+	private CosmosContainer garbage;
+
 	public CosmosDBLayer(CosmosClient client) {
 		this.client = client;
 	}
@@ -52,6 +54,7 @@ public class CosmosDBLayer {
 		users = db.getContainer("users");
 		messages= db.getContainer("messages");
 		channels = db.getContainer("channels");
+        garbage = db.getContainer("garbage");
 		
 	}
 	//------------------------------Messages------------------------------
@@ -206,6 +209,11 @@ public class CosmosDBLayer {
 		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
 		return messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
+
+    public CosmosItemResponse<Garbage> putGarbage(Garbage gb) {
+        init();
+        return garbage.createItem(gb);
+    }
 
 	public void close() {
 		client.close();
