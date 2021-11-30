@@ -36,11 +36,11 @@ public class UserResource {
         boolean pwdOk = false;
         // Check pwd
         User usr = GetObjects.getUserIfExists(user.getUser());
-        if (usr!=null) {
+        if (usr != null) {
             if (usr.getPwd().equals(user.getPwd()))
                 pwdOk = true;
         }
-        if (usr==null){
+        if (usr == null) {
             Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND);
         }
 
@@ -83,7 +83,7 @@ public class UserResource {
     @POST
     @Path("/{id}/subscribe/{channelId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response subscribeToChannel(@CookieParam("scc:session") Cookie session,@PathParam("id") String idUser, @PathParam("channelId") String idChannel) throws JsonProcessingException {
+    public Response subscribeToChannel(@CookieParam("scc:session") Cookie session, @PathParam("id") String idUser, @PathParam("channelId") String idChannel) throws JsonProcessingException {
         log.info("addChannelToUser Action Requested at User Resource");
 
         String cookie = GetObjects.getCookie(session);
@@ -95,27 +95,27 @@ public class UserResource {
             return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 
         Channel channel = GetObjects.getChannelIfExists(idChannel);
-        if (channel==null)
+        if (channel == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
             if (channel.isPublicChannel()) { // true -> quando o channel e publico
-                if(!channel.getMembers().contains(idUser)){
-                    UserDAO userChanged=subscribeComputation(idUser, idChannel);
+                if (!channel.getMembers().contains(idUser)) {
+                    UserDAO userChanged = subscribeComputation(idUser, idChannel);
                     return Response.status(Response.Status.OK).entity(userChanged).build();
                 }
                 return Response.status(Response.Status.OK).entity(user).build();
-            }else{
+            } else {
                 User userOwner = GetObjects.getUserIfExists(channel.getOwner());
                 if (userOwner == null)
                     return Response.status(Response.Status.FORBIDDEN).entity("99").build();
-                if(idUser.equals(userOwner.getId())){
-                    UserDAO userChanged=subscribeComputation(idUser, idChannel);
+                if (idUser.equals(userOwner.getId())) {
+                    UserDAO userChanged = subscribeComputation(idUser, idChannel);
                     return Response.status(Response.Status.OK).entity(userChanged).build();
                 }
                 return Response.status(Response.Status.FORBIDDEN).entity("104").build();
             }
-        }else{
+        } else {
             return Response.status(Response.Status.FORBIDDEN).entity("107").build();
         }
     }
@@ -135,7 +135,7 @@ public class UserResource {
     @POST
     @Path("/{id}/remove/{channelId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response unsubscribeToChannel(@CookieParam("scc:session") Cookie session,@PathParam("id") String idUser, @PathParam("channelId") String idChannel) throws JsonProcessingException {
+    public Response unsubscribeToChannel(@CookieParam("scc:session") Cookie session, @PathParam("id") String idUser, @PathParam("channelId") String idChannel) throws JsonProcessingException {
         log.info("removeChannelFromUser Action Requested at User Resource");
 
         String cookie = GetObjects.getCookie(session);
@@ -147,48 +147,40 @@ public class UserResource {
             return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 
         Channel channel = GetObjects.getChannelIfExists(idChannel);
-        if (channel==null)
+        if (channel == null)
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.CHANNEL_NOT_FOUND).build();
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
-            if (channel.isPublicChannel()) { // true -> quando o channel e publico
-                if(!channel.getMembers().contains(idUser)){
-                    UserDAO userChanged=unsubscribeComputation(idUser, idChannel);
-                    return Response.status(Response.Status.OK).entity(userChanged).build();
-                }
-                return Response.status(Response.Status.OK).entity(user).build();
-            }else{
-                User userOwner = GetObjects.getUserIfExists(channel.getOwner());
-                if (userOwner == null)
-                    return Response.status(Response.Status.FORBIDDEN).entity("99").build();
-                if(idUser.equals(userOwner.getId())){
-                    UserDAO userChanged=unsubscribeComputation(idUser, idChannel);
-                    return Response.status(Response.Status.OK).entity(userChanged).build();
-                }
-                return Response.status(Response.Status.FORBIDDEN).entity("104").build();
+            if (channel.getMembers().contains(idUser)) { // true -> quando o channel e publico
+                UserDAO userChanged = unsubscribeComputation(idUser, idChannel);
+                return Response.status(Response.Status.OK).entity(userChanged).build();
+            } else {
+                Response.status(Response.Status.FORBIDDEN).entity("104").build();
             }
-        }else{
-            return Response.status(Response.Status.FORBIDDEN).entity("107").build();
         }
+
+        return Response.status(Response.Status.FORBIDDEN).entity("107").build();
+
+
     }
 
     private UserDAO unsubscribeComputation(String idUser, String idChannel) throws JsonProcessingException {
         Optional<ChannelDAO> optional1 = db.getChannelById(idChannel).stream().findFirst();
-        if (optional1.isPresent()){
+        if (optional1.isPresent()) {
             ChannelDAO channel = optional1.get();
             ArrayList<String> users = channel.getMembers();
             users.remove(idUser);
             channel.setMembers(users);
-            db.updateChannel(idChannel,channel);
+            db.updateChannel(idChannel, channel);
             cache.setChannel(channel.toChannel());
         }
         Optional<UserDAO> optional = db.getUserById(idUser).stream().findFirst();
-        if (optional.isPresent()){
+        if (optional.isPresent()) {
             UserDAO user = optional.get();
-            ArrayList<String> channels =user.getChannelIds();
+            ArrayList<String> channels = user.getChannelIds();
             channels.remove(idChannel);
             user.setChannelIds(channels);
-            db.updateUser(idUser,user);
+            db.updateUser(idUser, user);
             cache.setUser(user.toUser());
             return user;
         }
@@ -226,7 +218,7 @@ public class UserResource {
                 return Response.status(Response.Status.OK).entity(channelIds).build();
             }
         }
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
     }
 
@@ -243,7 +235,7 @@ public class UserResource {
         if (cookie.equals(""))
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         User user = GetObjects.getUserIfExists(id);
-        if (user==null)
+        if (user == null)
             return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
@@ -297,7 +289,7 @@ public class UserResource {
             if (cache.verifySessionCookie(cookie, user.getId())) {
                 db.delUser(user);
                 cache.deleteUser(id);
-                db.putGarbage(new Garbage("USER",user.getId()));
+                db.putGarbage(new Garbage("USER", user.getId()));
                 return Response.status(Response.Status.OK).entity(user.toUser()).build();
             }
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
