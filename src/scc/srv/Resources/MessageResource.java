@@ -34,17 +34,8 @@ public class MessageResource {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(@CookieParam("scc:session") Cookie session, Message m) throws JsonProcessingException {
-        String cookie = GetObjects.getCookie(session);
-        if (db.getMessageById(m.getId()).stream().count() > 0) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(Quotes.MESSAGE_EXISTS).build();
-        }
-        if (cookie.equals(""))
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         User user = GetObjects.getUserIfExists(m.getUser());
-        if (user == null)
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
-        if (cache.verifySessionCookie(cookie, user.getId())) {
+        if (verifyMessage(session,user)) {
             if (user.getChannelIds().contains(m.getChannel())) {
                 if (verifyMsgExists(m.getReplyTo()) || m.getReplyTo().equals("")) {
                     log.info("create Action Requested at Message Resource");
@@ -67,18 +58,9 @@ public class MessageResource {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
-        String cookie = GetObjects.getCookie(session);
-        if (cookie.equals(""))
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-        Message message = GetObjects.getMessageIfExists(id);
-        if (message == null)
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
+        MessageDAO message = getMessageFromDb(id);
         User user = GetObjects.getUserIfExists(message.getUser());
-        if (user == null)
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
-        if (cache.verifySessionCookie(cookie, user.getId())) {
+        if (verifyMessage(session, message, user)) {
             log.info("getById Action Requested at Message Resource");
             return Response.status(Response.Status.OK).entity(message).build();
         }
@@ -96,19 +78,9 @@ public class MessageResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
         log.info("deleteById Action Requested at Message Resource");
-        String cookie = GetObjects.getCookie(session);
-        if (cookie.equals(""))
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
         MessageDAO message = getMessageFromDb(id);
-        if (message == null)
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.MESSAGE_NOT_FOUND).build();
-
         User user = GetObjects.getUserIfExists(message.getUser());
-        if (user == null)
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.USER_NOT_FOUND).build();
-
-        if (cache.verifySessionCookie(cookie, user.getId())) {
+        if (verifyMessage(session, message, user)) {
             if (user.getChannelIds().contains(message.getChannelId())) {
                 db.putMessage(message);
                 cache.setMessage(message.toMessage());
@@ -129,19 +101,9 @@ public class MessageResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, Message newMessage) {
         try {
-            String cookie = GetObjects.getCookie(session);
-            if (cookie.equals(""))
-                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
             MessageDAO m = db.getMessageById(id).stream().findFirst().get();
-            if (m == null)
-                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
             User user = GetObjects.getUserIfExists(m.getUser());
-            if (user == null)
-                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-
-            if (cache.verifySessionCookie(cookie, user.getId())) {
+            if(verifyMessage(session, m, user) == null) {
                 log.info("getById Action Requested at Message Resource");
                 log.info("updateById Action Requested at Channel Resource");
 
@@ -184,7 +146,36 @@ public class MessageResource {
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.MESSAGE_NOT_FOUND).build();
         }
     }
+    private Boolean verifyMessage(Cookie session, MessageDAO m, User user) throws JsonProcessingException {
+        String cookie = GetObjects.getCookie(session);
+        if (cookie.equals(""))
+            Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
+        if (m == null)
+            Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        if (user == null)
+            Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        if(!cache.verifySessionCookie(cookie, user.getId()))
+            Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        return true;
+    }
+
+    private Boolean verifyMessage(Cookie session, User user) throws JsonProcessingException {
+        String cookie = GetObjects.getCookie(session);
+        if (cookie.equals(""))
+            Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        if (user == null)
+            Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        if(!cache.verifySessionCookie(cookie, user.getId()))
+            Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        return true;
+    }
 
 
     private boolean verifyMsgExists(String id) {
