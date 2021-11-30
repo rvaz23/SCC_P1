@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.java.Log;
 import scc.cache.RedisCache;
 import scc.data.*;
+import scc.data.Channel.Channel;
+import scc.data.Channel.ChannelDAO;
 import scc.data.Garbage.Garbage;
 import scc.data.Message.Message;
 import scc.data.Message.MessageDAO;
@@ -117,6 +119,51 @@ public class MessageResource {
         return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
     }
 
+    /**
+     * Updates the message with the given id
+     * Return the message with the id.
+     */
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, Message newMessage) {
+        try {
+            String cookie = GetObjects.getCookie(session);
+            if (cookie.equals(""))
+                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+            MessageDAO m = db.getMessageById(id).stream().findFirst().get();
+            if (m == null)
+                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+            User user = GetObjects.getUserIfExists(m.getUser());
+            if (user == null)
+                return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+            if (cache.verifySessionCookie(cookie, user.getId())) {
+                log.info("getById Action Requested at Message Resource");
+                log.info("updateById Action Requested at Channel Resource");
+
+                if (newMessage.getId() != null || !newMessage.getId().equals("")) {
+                    m.setId(newMessage.getId());
+                }
+                if (newMessage.getText() != null || !newMessage.getText().equals("")) {
+                    m.setText(newMessage.getText());
+                }
+                if (newMessage.getImageId() != null) {
+                    m.setImageId(newMessage.getImageId());
+                }
+                db.updateMessage(id, m);
+                if (m != null) return Response.status(Response.Status.OK).entity(m.toMessage()).build();
+                else return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
+            }
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+
+        } catch (Exception e) {
+            throw new ServiceUnavailableException();
+        }
+    }
 
     /**
      * Lists the ids of all messages.

@@ -222,6 +222,12 @@ public class CosmosDBLayer {
 		return messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
 
+    public CosmosItemResponse<MessageDAO> updateMessage(String id, MessageDAO message) {
+        init();
+        PartitionKey key = new PartitionKey( id);
+        return messages.replaceItem(message,id,key,new CosmosItemRequestOptions());
+    }
+
     public CosmosItemResponse<Garbage> putGarbage(Garbage gb) {
         init();
         return garbage.createItem(gb);
