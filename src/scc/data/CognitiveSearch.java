@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 public class CognitiveSearch {
-    public static final String SEARCHSERVICEQUERYKEY = "736DB28373B6849B763051590ABEA67A";
-    public static final String INDEXNAME = "cosmosdb-index";
-    public static final String SEARCHSERVICE_URL = "https://scc2021rv.search.windows.net/";
+    public static final String SEARCHSERVICEQUERYKEY = System.getenv("SearchServiceQueryKey");// "736DB28373B6849B763051590ABEA67A";
+    public static final String INDEXNAME = System.getenv("IndexName");//"cosmosdb-index";
+    public static final String SEARCHSERVICE_URL = System.getenv("SearchServiceUrl");//"https://scc2021rv.search.windows.net/";
 
     private static CognitiveSearch instance;
     private static SearchClient searchClient;
