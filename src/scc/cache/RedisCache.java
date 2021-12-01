@@ -124,6 +124,10 @@ public class RedisCache {
 
     public String increment(Channel channel) {
         try (Jedis client = getCachePool().redis.getResource()) {
+            if(client.get("toptrending:" + channel.getId()) ==null){
+                client.setex("toptrending:" + channel.getId(),3600 ,mapper.writeValueAsString(0));
+            }
+
             Long result= client.incr("toptrending:" + channel.getId());
             client.close();
             return result.toString();
@@ -153,12 +157,15 @@ public class RedisCache {
 
             List<String> result= new ArrayList<>(5);
             int i=0;
-            while(i<5 && !map.isEmpty()){
+            while(i<5 && result.size()<=5 && !map.isEmpty()){
                 String lkey = map.lastKey();
                 Set<String> listChannels = map.get(lkey);
                 for(String channel: listChannels){
                     result.add(channel);
-                    if(i<5){
+                    if(i==4){
+                        return result;
+                    }
+                    if(i<5 && result.size()<=5){
                         i++;
                     }
                 }

@@ -102,6 +102,7 @@ public class UserResource {
             if (channel.isPublicChannel()) { // true -> quando o channel e publico
                 if (!channel.getMembers().contains(idUser)) {
                     UserDAO userChanged = subscribeComputation(idUser, idChannel);
+                    cache.increment(channel);
                     return Response.status(Response.Status.OK).entity(userChanged).build();
                 }
                 return Response.status(Response.Status.OK).entity(user).build();
