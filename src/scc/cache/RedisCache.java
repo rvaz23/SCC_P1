@@ -1,5 +1,6 @@
 package scc.cache;
 
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -9,6 +10,8 @@ import redis.clients.jedis.JedisPoolConfig;
 import scc.data.Channel.Channel;
 import scc.data.Message.Message;
 import scc.data.User.User;
+
+import java.util.*;
 
 public class RedisCache {
 
@@ -118,6 +121,57 @@ public class RedisCache {
         }
 
     }
+
+    public String increment(Channel channel) {
+        try (Jedis client = getCachePool().redis.getResource()) {
+            Long result= client.incr("toptrending:" + channel.getId());
+            client.close();
+            return result.toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public List<String> getTop5() {
+        try (Jedis client = getCachePool().redis.getResource()) {
+            Set<String> res = client.keys("toptrending:*");//verificar se é necessario tirar o "toptrending" ou n vem
+            SortedMap<String, Set<String>> map = new TreeMap<>();
+
+            for(String channelName: res){
+                String counter = client.get(channelName);
+
+                Set<String> a= map.get(counter);
+                if(a==null || a.isEmpty()){
+                    a= new HashSet<>();
+                    a.add(channelName);
+                    map.put(counter,a);
+                }else{
+                    a.add(channelName);
+                    map.put(counter,a);
+                }
+            }
+
+            List<String> result= new ArrayList<>(5);
+            int i=0;
+            while(i<5 && !map.isEmpty()){
+                String lkey = map.lastKey();
+                Set<String> listChannels = map.get(lkey);
+                for(String channel: listChannels){
+                    result.add(channel);
+                    if(i<5){
+                        i++;
+                    }
+                }
+                map.remove(lkey);
+            }
+
+            return result;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
 
     public boolean deleteUser(String id) {
         if (!cacheUse)
