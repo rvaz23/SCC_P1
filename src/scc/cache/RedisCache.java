@@ -51,7 +51,7 @@ public class RedisCache {
         if (!cacheUse)
             return null;
         try (Jedis client = getCachePool().redis.getResource()) {
-            String result = client.set("channel:" + channel.getId(), mapper.writeValueAsString(channel));
+            String result = client.setex("channel:" + channel.getId(),300 ,mapper.writeValueAsString(channel));
             client.close();
             return result;
         } catch (Exception e) {
@@ -110,7 +110,7 @@ public class RedisCache {
             return null;
         try (Jedis client = getCachePool().redis.getResource()) {
             String result;
-            result = client.set("user:" + user.getId(), mapper.writeValueAsString(user));
+            result = client.setex("user:" + user.getId(),300 ,mapper.writeValueAsString(user));
             client.close();
             return result;
         } catch (Exception e) {
@@ -141,7 +141,7 @@ public class RedisCache {
         if (!cacheUse)
             return null;
         try (Jedis client = getCachePool().redis.getResource()) {
-            String result = client.set("message:" + message.getId(), mapper.writeValueAsString(message));
+            String result = client.setex("message:" + message.getId(),300, mapper.writeValueAsString(message));
             client.close();
             return result;
         } catch (Exception e) {
