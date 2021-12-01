@@ -39,10 +39,10 @@ public class MessageResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(Quotes.MESSAGE_EXISTS).build();
         }
         if (cookie.equals(""))
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS+ ":NO COOKIE").build();
         User user = GetObjects.getUserIfExists(m.getUser());
         if (user == null)
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+            return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
             if (user.getChannelIds().contains(m.getChannel())) {
@@ -110,8 +110,8 @@ public class MessageResource {
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
             if (user.getChannelIds().contains(message.getChannelId())) {
-                db.putMessage(message);
-                cache.setMessage(message.toMessage());
+                db.delMessage(message);
+                cache.deleteMessage(message.getId());
                 db.putGarbage(new Garbage("MESSAGE", message.getId()));
                 return Response.status(Response.Status.OK).entity(message).build();
             }

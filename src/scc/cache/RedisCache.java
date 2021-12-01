@@ -161,8 +161,22 @@ public class RedisCache {
         } catch (Exception e) {
             return null;
         }
+    }
 
-
+    public boolean deleteMessage(String id) {
+        if (!cacheUse)
+            return false;
+        try (Jedis client = getCachePool().redis.getResource()) {
+            long deleted = client.del("message:" + id);
+            client.close();
+            if (deleted > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 

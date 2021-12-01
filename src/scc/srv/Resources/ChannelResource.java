@@ -48,7 +48,6 @@ public class ChannelResource {
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
             ChannelDAO channelDAO = createComputation(channel);
-
             addToMembersComputation(user.getId(), channelDAO.getId());
             log.info("create Action Requested at Channel Resource");
             return Response.status(Response.Status.OK).entity(channelDAO.toChannel()).build();
