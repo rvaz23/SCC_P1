@@ -111,6 +111,7 @@ public class UserResource {
                     return Response.status(Response.Status.FORBIDDEN).entity("99").build();
                 if (idUser.equals(userOwner.getId())) {
                     UserDAO userChanged = subscribeComputation(idUser, idChannel);
+                    cache.increment(channel);
                     return Response.status(Response.Status.OK).entity(userChanged).build();
                 }
                 return Response.status(Response.Status.FORBIDDEN).entity("104").build();

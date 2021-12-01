@@ -64,6 +64,22 @@ public class ChannelResource {
         return channelDAO;
     }
 
+    @GET
+    @Path("/trending")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response trendingChannels() throws JsonProcessingException {
+        log.info("getById Action Requested at Channel Resource");
+
+        List<String> trending = cache.getTop5();
+
+        if(!trending.isEmpty()){
+            return Response.status(Response.Status.OK).entity(trending).build();
+        }
+
+        return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+    }
+
+
     /**
      * Delete the channel with the given id
      */
