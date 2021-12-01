@@ -161,7 +161,8 @@ public class RedisCache {
                 String lkey = map.lastKey();
                 Set<String> listChannels = map.get(lkey);
                 for(String channel: listChannels){
-                    result.add(channel);
+                    String ch = channel.split(":")[1];
+                    result.add(ch);
                     if(i==4){
                         return result;
                     }
