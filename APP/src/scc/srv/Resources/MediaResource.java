@@ -6,10 +6,9 @@ import scc.utils.Hash;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -29,8 +28,8 @@ import com.azure.storage.blob.BlobContainerClientBuilder;
  * Resource for managing media files, such as images.
  */
 @Path("/media")
-public class MediaResource
-{
+public class MediaResource {
+	/*
 	Map<String,byte[]> map = new HashMap<String,byte[]>();
 	String storageConnectionString = System.getenv("BlobStoreConnection");
 	//String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=rvscc;AccountKey=uxX/JvXipvoolorUtuHCcxrBsEIOg3UhWDHBRJrO1ltPwjd4nOfe2/HZ5P8EygYoxXfqPA9VrVIzSynFs+cpQw==;EndpointSuffix=core.windows.net";
@@ -38,87 +37,43 @@ public class MediaResource
 			.connectionString(storageConnectionString)
 			.containerName("images")
 			.buildClient();
-	/**
-	 * Post a new image.The id of the image is its hash.
+
+
 	 */
-	@POST
-	@Path("/")
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	@Produces(MediaType.APPLICATION_JSON)
-	public String upload(byte[] contents) {
 
+    /**
+     * Post a new image.The id of the image is its hash.
+     */
+    @POST
+    @Path("/")
+    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_JSON)
+    public String upload(byte[] contents) {
 
-		/*
-		String key = Hash.of(contents);
-		BlobClient blob = containerClient.getBlobClient(key);
-
-
-		// Upload contents from BinaryData (check documentation for other alternatives)
-		if(!blob.exists()){
-			InputStream stream = new ByteArrayInputStream(contents);
-			//BinaryData binaryData = BinaryData.fromBytes(contents);
-			blob.upload(stream,contents.length);
-		}
-			return key;
-
-
-
-			public byte[] read(File file) throws IOException, FileTooBigException {
-    if (file.length() > MAX_FILE_SIZE) {
-        throw new FileTooBigException(file);
-    }
-    ByteArrayOutputStream ous = null;
-    InputStream ios = null;
-    try {
-        byte[] buffer = new byte[4096];
-        ous = new ByteArrayOutputStream();
-        ios = new FileInputStream(file);
-        int read = 0;
-        while ((read = ios.read(buffer)) != -1) {
-            ous.write(buffer, 0, read);
-        }
-    }finally {
-        try {
-            if (ous != null)
-                ous.close();
-        } catch (IOException e) {
-        }
+        String key = Hash.of(contents);
 
         try {
-            if (ios != null)
-                ios.close();
+            File file = new File("media/" + key);
+            if (file.createNewFile()) {
+                FileOutputStream outputStream = new FileOutputStream(file);
+                outputStream.write(contents);
+                return key;
+            }
         } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
         }
+        return key;
     }
-    return ous.toByteArray();
-}
 
-
-			*/
-		String key = Hash.of(contents);
-
-		try {
-			File file = new File("media/"+key);
-			if (file.createNewFile()) {
-				FileOutputStream outputStream = new FileOutputStream(file);
-				outputStream.write(contents);
-				return key;
-			}
-		} catch (IOException e) {
-			System.out.println("An error occurred.");
-			e.printStackTrace();
-		}
-		return "key";
-	}
-
-	/**
-	 * Return the contents of an image. Throw an appropriate error message if
-	 * id does not exist.
-	 */
-	@GET
-	@Path("/{id}")
-	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	public byte[] download(@PathParam("id") String id) {
+    /**
+     * Return the contents of an image. Throw an appropriate error message if
+     * id does not exist.
+     */
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public byte[] download(@PathParam("id") String id) {
 		/*BlobClient blob = containerClient.getBlobClient(id);
 		if (blob.exists()){
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -131,42 +86,52 @@ public class MediaResource
 			return bytes;
 		}*/
 
-		byte[] file= null;
-		try {
-			file= Files.readAllBytes(java.nio.file.Path.of("media/"+id));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+        byte[] file = null;
+        try {
+            file = Files.readAllBytes(java.nio.file.Path.of("media/" + id));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-		//TODO: complete !
-		throw new ServiceUnavailableException();
-	}
-	
-	@DELETE
-	@Path("/{id}")
-	public boolean delete(@PathParam("id") String id) {
-		BlobClient blob = containerClient.getBlobClient(id);
-		if (blob.exists()){
-		blob.delete();
-		return true;
-		}else {
-			return false;
-		}
-	}
+        //TODO: complete !
+        throw new ServiceUnavailableException();
+    }
 
-	/**
-	 * Lists the ids of images stored.
-	 */
-	@GET
-	@Path("/")
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<String> list() {
-		List<String> results= new ArrayList<String>();
-		for (BlobItem blobItem : containerClient.listBlobs()) {
-			results.add(blobItem.getName());
-		}
-		return results;
-	}
-}
+    @DELETE
+    @Path("/{id}")
+    public boolean delete(@PathParam("id") String id) {
+        try {
+            File f = new File("media/" + id);           //file to be delete
+            if (f.delete())                      //returns Boolean value
+            {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+        /**
+         * Lists the ids of images stored.
+         */
+        @GET
+        @Path("/")
+        @Produces(MediaType.APPLICATION_JSON)
+        public List<String> list () {
+            List<String> list = new LinkedList<>();
+            File folder = new File("media");
+            File[] listOfFiles = folder.listFiles();
+
+            for (int i = 0; i < listOfFiles.length; i++) {
+                if (listOfFiles[i].isFile()) {
+                    list.add(listOfFiles[i].getName());
+                }
+            }
+            return list;
+        }
+    }
