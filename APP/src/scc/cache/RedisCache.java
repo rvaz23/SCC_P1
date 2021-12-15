@@ -4,6 +4,8 @@ package scc.cache;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
@@ -14,6 +16,8 @@ import scc.data.User.User;
 import java.util.*;
 
 public class RedisCache {
+
+    private static final Logger logger = LogManager.getLogger(RedisCache.class);
 
     private static final String RedisHostname = System.getenv("REDIS_URL");
     private static final String RedisKey = System.getenv("REDIS_KEY");
@@ -36,7 +40,8 @@ public class RedisCache {
         poolConfig.setTestWhileIdle(true);
         poolConfig.setNumTestsPerEvictionRun(3);
         poolConfig.setBlockWhenExhausted(true);
-        redis = new JedisPool(poolConfig, RedisHostname, 6380, 5000, RedisKey, true);
+        redis = new JedisPool(poolConfig,RedisHostname,6379,5000,false);
+        //redis = new JedisPool(poolConfig, RedisHostname, 6379, 5000, RedisKey, false);
         instance = new RedisCache(redis);
         return instance;
 
@@ -268,6 +273,7 @@ public class RedisCache {
             client.close();
             return false;
         }catch (Exception e){
+            logger.info(e.getMessage());
             return false;
         }
     }

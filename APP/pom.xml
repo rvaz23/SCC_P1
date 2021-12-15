@@ -3,7 +3,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">  
   <modelVersion>4.0.0</modelVersion>  
   <groupId>pt.unl.fct.di.scc</groupId>  
-  <artifactId>scc2122-lab1</artifactId>  
+  <artifactId>scc2122</artifactId>
   <version>1.0</version>  
   <packaging>war</packaging>  
   <dependencies> 
@@ -128,8 +128,8 @@
         <version>2.1.0</version>  
         <configuration> 
           <schemaVersion>V2</schemaVersion>  
-          <pricingTier>F1</pricingTier>  
-          <region>eastus</region>
+          <pricingTier>B1</pricingTier>  
+          <region>northeurope</region>
           <runtime> 
             <os>linux</os>  
             <javaVersion>java11</javaVersion>  
@@ -145,8 +145,8 @@
               </resource> 
             </resources> 
           </deployment>
-          <resourceGroup>scc2122-rg-eastus-52656</resourceGroup>
-          <appName>rv-proj1eastus52656</appName>
+          <resourceGroup>scc2122-rg-northeurope-52656</resourceGroup>
+          <appName>rv-proj1northeurope52656</appName>
         </configuration> 
       </plugin> 
     </plugins> 
