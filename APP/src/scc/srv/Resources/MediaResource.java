@@ -4,10 +4,8 @@ import com.azure.core.util.BinaryData;
 import com.azure.storage.blob.models.BlobItem;
 import scc.utils.Hash;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,8 +47,11 @@ public class MediaResource
 	@Produces(MediaType.APPLICATION_JSON)
 	public String upload(byte[] contents) {
 
+
+		/*
 		String key = Hash.of(contents);
 		BlobClient blob = containerClient.getBlobClient(key);
+
 
 		// Upload contents from BinaryData (check documentation for other alternatives)
 		if(!blob.exists()){
@@ -59,6 +60,55 @@ public class MediaResource
 			blob.upload(stream,contents.length);
 		}
 			return key;
+
+
+
+			public byte[] read(File file) throws IOException, FileTooBigException {
+    if (file.length() > MAX_FILE_SIZE) {
+        throw new FileTooBigException(file);
+    }
+    ByteArrayOutputStream ous = null;
+    InputStream ios = null;
+    try {
+        byte[] buffer = new byte[4096];
+        ous = new ByteArrayOutputStream();
+        ios = new FileInputStream(file);
+        int read = 0;
+        while ((read = ios.read(buffer)) != -1) {
+            ous.write(buffer, 0, read);
+        }
+    }finally {
+        try {
+            if (ous != null)
+                ous.close();
+        } catch (IOException e) {
+        }
+
+        try {
+            if (ios != null)
+                ios.close();
+        } catch (IOException e) {
+        }
+    }
+    return ous.toByteArray();
+}
+
+
+			*/
+		String key = Hash.of(contents);
+
+		try {
+			File file = new File("media/"+key);
+			if (file.createNewFile()) {
+				FileOutputStream outputStream = new FileOutputStream(file);
+				outputStream.write(contents);
+				return key;
+			}
+		} catch (IOException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		}
+		return "key";
 	}
 
 	/**
@@ -69,7 +119,7 @@ public class MediaResource
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
 	public byte[] download(@PathParam("id") String id) {
-		BlobClient blob = containerClient.getBlobClient(id);
+		/*BlobClient blob = containerClient.getBlobClient(id);
 		if (blob.exists()){
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			blob.download(outputStream);
@@ -79,7 +129,17 @@ public class MediaResource
 			//BinaryData data = blob.downloadContent();
 			//return data.toBytes();
 			return bytes;
+		}*/
+
+		byte[] file= null;
+		try {
+			file= Files.readAllBytes(java.nio.file.Path.of("media/"+id));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+
 		//TODO: complete !
 		throw new ServiceUnavailableException();
 	}
