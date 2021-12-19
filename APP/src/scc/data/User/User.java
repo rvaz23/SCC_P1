@@ -13,6 +13,7 @@ public class User {
 	private String photoId;
 	private ArrayList<String> channelIds;
 
+
 	public User(String id, String name, String pwd, String photoId, ArrayList<String> channelIds) {
 		super();
 		this.id = id;

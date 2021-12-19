@@ -1,5 +1,7 @@
 package scc.data.User;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import scc.data.User.User;
 
 import java.util.ArrayList;
@@ -15,6 +17,14 @@ public class UserDAO {
 	private String pwd;
 	private String photoId;
 	private ArrayList<String> channelIds;
+
+	public static final DBObject toDBObject(UserDAO user) {
+		return new BasicDBObject("id", user.getId())
+				.append("name", user.getName())
+				.append("pwd", user.getPwd())
+				.append("photoId", user.getPhotoId())
+				.append("channelIds", user.getChannelIds() );
+	}
 
 	public UserDAO() {
 	}
