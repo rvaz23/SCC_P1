@@ -154,16 +154,6 @@ public class MongoDB {
 
 	//------------------------------Users------------------------------
 
-	public boolean delUserById(String id) {
-		init();
-		Bson query = eq("id", id);
-		DeleteResult res = users.deleteOne(query);
-		return res.wasAcknowledged() ;
-	}
-	public CosmosItemResponse<Object> delUser(UserDAO user) {
-		init();
-		return users.deleteItem(user, new CosmosItemRequestOptions());
-	}
 	public UserDAO putUser(UserDAO user) {
 		init();
 		InsertOneResult result=users.insertOne(UserDAO.toDBObject(user));
@@ -173,6 +163,42 @@ public class MongoDB {
 			return null;
 
 	}
+
+	public UserDAO getUserById( String id) {
+		init();
+		UserDAO somebody = (UserDAO) users.find(eq("id", id)).first();
+		return somebody;
+	}
+
+
+	public boolean delUserById(String id) {
+		init();
+		Bson query = eq("id", id);
+		DeleteResult res = users.deleteOne(query);
+		return res.wasAcknowledged() ;
+	}
+
+
+	public boolean delUser(UserDAO user) {
+		init();
+		Bson filter = eq("id", user.getId());
+		DeleteResult result = users.deleteOne(filter);
+		return result.wasAcknowledged() ;
+	}
+
+	public boolean updateUser(String id,UserDAO user) {
+		init();
+		Bson query = eq("id",id);
+		UpdateResult updateResult = crew.replaceOne(query, UserDAO.toDBObject(user));
+		return updateResult.wasAcknowledged();
+	}
+
+	public UserDao getUserByUsername( String username) {
+		init();
+		UserDAO somebody = (UserDAO) users.find(eq("name", username)).first();
+		return somebody;
+	}
+
 
 	public CosmosItemResponse<UserDAO> addChannelToUser(String idUser,String idChannel) {
 		init();
@@ -186,22 +212,9 @@ public class MongoDB {
         return users.patchItem(idUser, key, CosmosPatchOperations.create().remove("/channelIds/" + idChannel), UserDAO.class);
     }
 
-    public CosmosItemResponse<UserDAO> updateUser(String id,UserDAO user) {
-        init();
-		PartitionKey key = new PartitionKey( id);
-        return users.replaceItem(user,id,key,new CosmosItemRequestOptions());
-    }
 
-	public CosmosPagedIterable<UserDAO> getUserById( String id) {
-		init();
-		UserDAO somebody = (UserDAO) users.find(eq("id", id)).first();
-		return users.queryItems("SELECT * FROM users WHERE users.id=\"" + id + "\"", new CosmosQueryRequestOptions(), UserDAO.class);
-	}
 	
-	public CosmosPagedIterable<UserDAO> getUserByUsername( String username) {
-		init();
-		return users.queryItems("SELECT * FROM users WHERE users.name=\"" + username + "\"", new CosmosQueryRequestOptions(), UserDAO.class);
-	}
+
 
 	public CosmosPagedIterable<UserDAO> getUsers(int offset,int limit) {
 		init();
@@ -233,6 +246,9 @@ public class MongoDB {
 		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
 		return messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
+
+
+	////////////////////////////////////7
 
     public CosmosItemResponse<MessageDAO> updateMessage(String id, MessageDAO message) {
         init();
