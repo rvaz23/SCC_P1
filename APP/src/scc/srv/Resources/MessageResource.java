@@ -11,6 +11,7 @@ import scc.data.Garbage.Garbage;
 import scc.data.Message.Message;
 import scc.data.Message.MessageDAO;
 import scc.data.User.User;
+import scc.data.User.UserDAO;
 import scc.utils.Quotes;
 
 import javax.ws.rs.*;
@@ -24,7 +25,7 @@ import java.util.Optional;
 @Log
 @Path("/messages")
 public class MessageResource {
-    CosmosDBLayer db = CosmosDBLayer.getInstance();
+    MongoDB db = MongoDB.getInstance();
     RedisCache cache = RedisCache.getCachePool();
 
     /**
@@ -35,7 +36,7 @@ public class MessageResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(@CookieParam("scc:session") Cookie session, Message m) throws JsonProcessingException {
         String cookie = GetObjects.getCookie(session);
-        if (db.getMessageById(m.getId()).stream().count() > 0) {
+        if (db.getMessageById(m.getId()) != null) {
             return Response.status(Response.Status.BAD_REQUEST).entity(Quotes.MESSAGE_EXISTS).build();
         }
         if (cookie.equals(""))
@@ -133,7 +134,7 @@ public class MessageResource {
             if (cookie.equals(""))
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
-            MessageDAO m = db.getMessageById(id).stream().findFirst().get();
+            MessageDAO m = getMessageFromDb(id);
             if (m == null)
                 return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
@@ -168,7 +169,8 @@ public class MessageResource {
     /**
      * Lists the ids of all messages.
      */
-    @GET
+
+    /*@GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAll(@QueryParam("st") int offset, @QueryParam("len") int limit) {
@@ -184,13 +186,13 @@ public class MessageResource {
             return Response.status(Response.Status.NOT_FOUND).entity(Quotes.MESSAGE_NOT_FOUND).build();
         }
     }
-
+*/
 
 
     private boolean verifyMsgExists(String id) {
         if (cache.getMessage(id) != null)
             return true;
-        if (db.getMessageById(id).stream().count() > 0)
+        if (db.getMessageById(id) != null)
             return true;
         return false;
     }
@@ -198,12 +200,14 @@ public class MessageResource {
 
     private MessageDAO getMessageFromDb(String idMessage) throws JsonProcessingException {
         MessageDAO message = null;
-        Optional<MessageDAO> op = db.getMessageById(idMessage).stream().findFirst();
-        if (op.isPresent()) {
-            message = op.get();
+        MessageDAO m = db.getMessageById(idMessage);
+
+        if (m!=null) {
+            message = m;
             cache.setMessage(message.toMessage());
         }
         return message;
     }
+
 
 }
