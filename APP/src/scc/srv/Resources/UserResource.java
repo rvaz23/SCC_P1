@@ -26,7 +26,7 @@ import java.util.*;
 @Log
 @Path("/user")
 public class UserResource {
-    CosmosDBLayer db = CosmosDBLayer.getInstance();
+    MongoDB db = MongoDB.getInstance();
     RedisCache cache = RedisCache.getCachePool();
 
     @POST
@@ -60,15 +60,14 @@ public class UserResource {
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(User user) throws JsonProcessingException {
-        // TODO Verificar se dois users nao tem mesmo nome/ID
         log.info("Create Action Requested at User Resource");
         UserDAO userDAO = new UserDAO(user);
 
-        if (db.getUserById(user.getId()).stream().count() > 0) {
+        if (db.getUserById(user.getId()) !=null) {
             return Response.status(Status.BAD_REQUEST).entity(Quotes.USER_EXISTS).build();
         }
 
-        if (db.getUserByUsername(user.getName()).stream().count() > 0) {
+        if (db.getUserByUsername(user.getName())!=null) {
             return Response.status(Status.BAD_REQUEST).entity(Quotes.USER_EXISTS).build();
         }
 
@@ -78,8 +77,95 @@ public class UserResource {
     }
 
     /**
-     * Add user with Id to channel with Id
+     * Return the user with the id.
      */
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
+        log.info("getById Action Requested at User Resource");
+        // procurar na cache
+        String cookie = GetObjects.getCookie(session);
+        if (cookie.equals(""))
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        User user = GetObjects.getUserIfExists(id);
+        if (user == null)
+            return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+
+        if (cache.verifySessionCookie(cookie, user.getId())) {
+            return Response.status(Response.Status.OK).entity(user).build();
+        } else {
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        }
+    }
+
+    private UserDAO getUserFromDb(String idUser)  {
+        UserDAO user = null;
+        UserDAO u = db.getUserById(idUser);
+        if (u!=null) {
+            user = u;
+            cache.setUser(user.toUser());
+        }
+        return user;
+    }
+
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, User user) throws JsonProcessingException {
+        String cookie = GetObjects.getCookie(session);
+        if (cookie.equals(""))
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        UserDAO u = getUserFromDb(id);
+        if (u != null) {
+            if (cache.verifySessionCookie(cookie, u.getId())) {
+                if (user.getName() != null || !user.getName().equals("")) {
+                    u.setName(user.getName());
+                }
+                if (user.getPhotoId() != null || !user.getPhotoId().equals("")) {
+                    u.setPhotoId(user.getPhotoId());
+                }
+                if (user.getPwd() != null || !user.getPwd().equals("")) {
+                    u.setPwd(user.getPwd());
+                }
+                db.updateUser(id, u);
+                cache.setUser(u.toUser());
+            }
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
+        log.info("deleteById Action Requested at User Resource");
+        String cookie = GetObjects.getCookie(session);
+        if (cookie.equals(""))
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        UserDAO user = getUserFromDb(id);
+        if (user != null) {
+            if (cache.verifySessionCookie(cookie, user.getId())) {
+                db.delUser(user);
+                cache.deleteUser(id);
+                db.putGarbage(new Garbage("USER", user.getId()));
+                return Response.status(Response.Status.OK).entity(user.toUser()).build();
+            }
+            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
+        }
+        return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
+    }
+
+
+
+
+
+
+    /**
+       * Add user with Id to channel with Id
+
     @POST
     @Path("/{id}/subscribe/{channelId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -123,7 +209,7 @@ public class UserResource {
     }
 
     private UserDAO subscribeComputation(String idUser, String idChannel) throws JsonProcessingException {
-        UserDAO user1 = db.addChannelToUser(idUser, idChannel).getItem();
+        UserDAO user1 = db.addChannelToUser(idUser, idChannel);
         ChannelDAO channel1 = db.addUserToChannel(idChannel, idUser).getItem();
         cache.setUser(user1.toUser());
         cache.setChannel(channel1.toChannel());
@@ -133,7 +219,7 @@ public class UserResource {
 
     /**
      * Remove user with Id to channel with Id
-     */
+
     @POST
     @Path("/{id}/remove/{channelId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -194,7 +280,7 @@ public class UserResource {
      * Get channels associated to user id
      *
      * @return
-     */
+
     @GET
     @Path("/{id}/channels")
     @Produces(MediaType.APPLICATION_JSON)
@@ -224,32 +310,11 @@ public class UserResource {
 
     }
 
-    /**
-     * Return the user with the id.
-     */
-    @GET
-    @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
-        log.info("getById Action Requested at User Resource");
-        // procurar na cache
-        String cookie = GetObjects.getCookie(session);
-        if (cookie.equals(""))
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-        User user = GetObjects.getUserIfExists(id);
-        if (user == null)
-            return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 
-        if (cache.verifySessionCookie(cookie, user.getId())) {
-            return Response.status(Response.Status.OK).entity(user).build();
-        } else {
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-        }
-    }
 
     /**
      * Updates and returns the user if id is valid.
-     */
+
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -299,9 +364,10 @@ public class UserResource {
         return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
     }
 
+
     /**
      * Lists the ids of all users.
-     */
+     *
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -325,5 +391,6 @@ public class UserResource {
         return user;
     }
 
+    */
 
 }

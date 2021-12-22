@@ -1,25 +1,20 @@
 package scc.data;
 
-import com.azure.cosmos.*;
-import com.azure.cosmos.models.CosmosPatchOperations;
 import com.azure.cosmos.models.*;
 import com.azure.cosmos.util.CosmosPagedIterable;
-import com.mongodb.*;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
-import org.bson.Document;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.conversions.Bson;
 import scc.data.Channel.ChannelDAO;
 import scc.data.Garbage.Garbage;
 import scc.data.Message.MessageDAO;
 import scc.data.User.UserDAO;
 
-
-import java.net.UnknownHostException;
 
 import static com.mongodb.client.model.Filters.eq;
 
@@ -64,23 +59,24 @@ public class MongoDB {
 	}
 	//------------------------------Messages------------------------------
 
+
 	public CosmosItemResponse<Object> delMessageById(String id) {
 		init();
 		PartitionKey key = new PartitionKey( id);
-		return messages.deleteItem(id, key, new CosmosItemRequestOptions());
+		return null;//messages.deleteItem(id, key, new CosmosItemRequestOptions());
 	}
 	public CosmosItemResponse<Object> delMessage(MessageDAO message) {
 		init();
-		return messages.deleteItem(message, new CosmosItemRequestOptions());
+		return null;//messages.deleteItem(message, new CosmosItemRequestOptions());
 	}
 	public CosmosItemResponse<MessageDAO> putMessage(MessageDAO message) {
 		init();
-		return messages.createItem(message);
+		return null;//messages.createItem(message);
 	}
 
 	public CosmosPagedIterable<MessageDAO> getMessageById( String id) {
 		init();
-		return messages.queryItems("SELECT * FROM messages WHERE messages.id=\"" + id + "\"", new CosmosQueryRequestOptions(), MessageDAO.class);
+		return null;//messages.queryItems("SELECT * FROM messages WHERE messages.id=\"" + id + "\"", new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
 
 	public CosmosPagedIterable<MessageDAO> getMessages(int offset, int limit) {
@@ -94,7 +90,7 @@ public class MongoDB {
             limString=" LIMIT "+limit;
         }
         String query = "SELECT * FROM messages";
-        return messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
+        return null;//messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
 	//------------------------------Channels------------------------------
 
@@ -102,18 +98,18 @@ public class MongoDB {
 	public CosmosItemResponse<ChannelDAO> addUserToChannel(String idChannel, String idUser) {
 		init();
 		PartitionKey key = new PartitionKey( idChannel);
-		return channels.patchItem(idChannel, key, CosmosPatchOperations.create().add("/members/0",idUser), ChannelDAO.class);
+		return null;//channels.patchItem(idChannel, key, CosmosPatchOperations.create().add("/members/0",idUser), ChannelDAO.class);
 	}
 
     public CosmosItemResponse<ChannelDAO> removeUserFromChannel(String idChannel, String idUser) {
         init();
         PartitionKey key = new PartitionKey( idChannel);
-        return channels.patchItem(idChannel, key, CosmosPatchOperations.create().remove("/members/" + idUser), ChannelDAO.class);
+        return null;//channels.patchItem(idChannel, key, CosmosPatchOperations.create().remove("/members/" + idUser), ChannelDAO.class);
     }
 
 	public CosmosItemResponse<ChannelDAO> putChannel(ChannelDAO channel) {
 		init();
-		return channels.createItem(channel);
+		return null;//channels.createItem(channel);
 	}
 
 
@@ -128,24 +124,24 @@ public class MongoDB {
             limString=" LIMIT "+limit;
         }
         String query = "SELECT * FROM channels";
-        return channels.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), ChannelDAO.class);
+        return null;//channels.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), ChannelDAO.class);
 	}
 
 	public CosmosPagedIterable<ChannelDAO> getChannelById( String id) {
 		init();
-		return channels.queryItems("SELECT * FROM channels WHERE channels.id=\"" + id + "\"", new CosmosQueryRequestOptions(), ChannelDAO.class);
+		return null;//channels.queryItems("SELECT * FROM channels WHERE channels.id=\"" + id + "\"", new CosmosQueryRequestOptions(), ChannelDAO.class);
 	}
 
 	public CosmosItemResponse<Object> delChannelById(String id) {
 		init();
 		PartitionKey key = new PartitionKey( id);
-		return channels.deleteItem(id, key, new CosmosItemRequestOptions());
+		return null;//channels.deleteItem(id, key, new CosmosItemRequestOptions());
 	}
 
 	public CosmosItemResponse<ChannelDAO> updateChannel(String id,ChannelDAO channel) {
 		init();
 		PartitionKey key = new PartitionKey( id);
-		return channels.replaceItem(channel,id,key,new CosmosItemRequestOptions());
+		return null;//UserDAOchannels.replaceItem(channel,id,key,new CosmosItemRequestOptions());
 	}
 
 
@@ -166,18 +162,8 @@ public class MongoDB {
 
 	public UserDAO getUserById( String id) {
 		init();
-		UserDAO somebody = (UserDAO) users.find(eq("id", id)).first();
-		return somebody;
+		return (UserDAO) users.find(eq("id", id)).first();
 	}
-
-
-	public boolean delUserById(String id) {
-		init();
-		Bson query = eq("id", id);
-		DeleteResult res = users.deleteOne(query);
-		return res.wasAcknowledged() ;
-	}
-
 
 	public boolean delUser(UserDAO user) {
 		init();
@@ -189,27 +175,47 @@ public class MongoDB {
 	public boolean updateUser(String id,UserDAO user) {
 		init();
 		Bson query = eq("id",id);
-		UpdateResult updateResult = crew.replaceOne(query, UserDAO.toDBObject(user));
+		UpdateResult updateResult = users.updateOne(query, UserDAO.toDBObject(user));
 		return updateResult.wasAcknowledged();
 	}
 
-	public UserDao getUserByUsername( String username) {
+	public UserDAO getUserByUsername( String username) {
 		init();
-		UserDAO somebody = (UserDAO) users.find(eq("name", username)).first();
+		return (UserDAO) users.find(eq("name", username)).first();
+	}
+
+
+	public boolean delUserById(String id) {
+		init();
+		Bson query = eq("id", id);
+		DeleteResult res = users.deleteOne(query);
+		return res.wasAcknowledged() ;
+	}
+
+
+
+
+
+	public UserDAO addChannelToUser(String idUser, String idChannel) {
+		init();
+		UserDAO somebody = (UserDAO) users.find(eq("id", idUser)).first();
+		somebody.addChannel(idChannel);
+		Bson query = eq("id",idUser);
+		users.updateOne(query, UserDAO.toDBObject(somebody));
 		return somebody;
 	}
 
-
-	public CosmosItemResponse<UserDAO> addChannelToUser(String idUser,String idChannel) {
-		init();
-		PartitionKey key = new PartitionKey( idUser);
-		return users.patchItem(idUser, key, CosmosPatchOperations.create().add("/channelIds/0",idChannel), UserDAO.class);
-	}
-
-    public CosmosItemResponse<UserDAO> removeChannelFromUser(String idUser,String idChannel) {
+    public UserDAO removeChannelFromUser(String idUser, String idChannel) {
         init();
-        PartitionKey key = new PartitionKey(idUser);
-        return users.patchItem(idUser, key, CosmosPatchOperations.create().remove("/channelIds/" + idChannel), UserDAO.class);
+		UserDAO somebody = (UserDAO) users.find(eq("id", idUser)).first();
+		if(somebody!=null){
+			somebody.removeChannel(idChannel);
+			Bson query = eq("id",idUser);
+			users.updateOne(query, UserDAO.toDBObject(somebody));
+			return somebody;
+		}
+
+		return null;
     }
 
 
@@ -228,7 +234,7 @@ public class MongoDB {
 		}
 		String query ="SELECT * FROM Users ORDER BY Users.id" ;//LIMIT 20";
 		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
-		return users.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), UserDAO.class);
+		return null;//users.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), UserDAO.class);
 	}
 
 	public CosmosPagedIterable<MessageDAO> getMessages(int offset,int limit, String idChannel) {
@@ -244,7 +250,7 @@ public class MongoDB {
 
 		String query ="SELECT * FROM messages WHERE messages.channelId=\"" + idChannel +"\" ORDER BY messages.id "   ;
 		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
-		return messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
+		return null;//messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
 
 
@@ -253,12 +259,12 @@ public class MongoDB {
     public CosmosItemResponse<MessageDAO> updateMessage(String id, MessageDAO message) {
         init();
         PartitionKey key = new PartitionKey( id);
-        return messages.replaceItem(message,id,key,new CosmosItemRequestOptions());
+        return null;//messages.replaceItem(message,id,key,new CosmosItemRequestOptions());
     }
 
     public CosmosItemResponse<Garbage> putGarbage(Garbage gb) {
         init();
-        return garbage.createItem(gb);
+        return null;//garbage.createItem(gb);
     }
 
 	public void close() {

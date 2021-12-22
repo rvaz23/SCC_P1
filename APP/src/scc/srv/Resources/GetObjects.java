@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public class GetObjects {
 
-    private static CosmosDBLayer db = CosmosDBLayer.getInstance();
+    private static MongoDB db = MongoDB.getInstance();
     private static RedisCache cache = RedisCache.getCachePool();
 
 
@@ -30,9 +30,9 @@ public class GetObjects {
     public static User getUserIfExists(String idUser) throws JsonProcessingException {
         User user = cache.getUser(idUser);
         if(user==null){
-            Optional<UserDAO> op = db.getUserById(idUser).stream().findFirst();
-            if (op.isPresent()) {
-                user = op.get().toUser();
+            UserDAO u = db.getUserById(idUser);
+            if (u!=null) {
+                user = u.toUser();
                 cache.setUser(user);
             }
         }
@@ -43,9 +43,9 @@ public class GetObjects {
         //User user = cache.getUser(idUser);
         User user = null;
         if(user==null){
-            Optional<UserDAO> op = db.getUserByUsername(name).stream().findFirst();
-            if (op.isPresent()) {
-                user = op.get().toUser();
+           UserDAO u = db.getUserByUsername(name);
+            if (u!=null) {
+                user = u.toUser();
                 cache.setUser(user);
             }
         }

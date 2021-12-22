@@ -56,6 +56,15 @@ public class User {
 	public void setChannelIds(ArrayList<String> channelIds) {
 		this.channelIds = channelIds;
 	}
+
+	public void addChannel(String idChannel){
+		channelIds.add(idChannel);
+	}
+
+	public void removeChannel(String idChannel){
+		channelIds.remove(idChannel);
+	}
+
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", name=" + name + ", pwd=" + pwd + ", photoId=" + photoId + ", channelIds="

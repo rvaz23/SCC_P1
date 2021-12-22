@@ -2,9 +2,15 @@ package scc.data.User;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.bson.Document;
 import scc.data.User.User;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.Arrays.asList;
+
 
 /**
  * Represents a User, as stored in the database
@@ -18,12 +24,12 @@ public class UserDAO {
 	private String photoId;
 	private ArrayList<String> channelIds;
 
-	public static final DBObject toDBObject(UserDAO user) {
-		return new BasicDBObject("id", user.getId())
+	public static Document toDBObject(UserDAO user) {
+		return new Document("id", user.getId())
 				.append("name", user.getName())
 				.append("pwd", user.getPwd())
 				.append("photoId", user.getPhotoId())
-				.append("channelIds", user.getChannelIds() );
+				.append("channelIds", asList(user.getChannelIds()));
 	}
 
 	public UserDAO() {
@@ -80,6 +86,15 @@ public class UserDAO {
 		return photoId;
 	}
 	public void setPhotoId(String photoId) {this.photoId = photoId;}
+
+
+	public void addChannel(String idChannel){
+		channelIds.add(idChannel);
+	}
+
+	public void removeChannel(String idChannel){
+		channelIds.remove(idChannel);
+	}
 
 	public ArrayList<String> getChannelIds() {return channelIds;}
 
