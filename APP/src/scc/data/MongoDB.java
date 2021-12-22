@@ -60,23 +60,31 @@ public class MongoDB {
 	//------------------------------Messages------------------------------
 
 
-	public CosmosItemResponse<Object> delMessageById(String id) {
-		init();
-		PartitionKey key = new PartitionKey( id);
-		return null;//messages.deleteItem(id, key, new CosmosItemRequestOptions());
+
+    public Boolean delMessageById(String id) {
+        init();
+        Bson query = eq("id", id);
+        DeleteResult res = messages.deleteOne(query);
+        return res.wasAcknowledged() ;
 	}
-	public CosmosItemResponse<Object> delMessage(MessageDAO message) {
-		init();
-		return null;//messages.deleteItem(message, new CosmosItemRequestOptions());
+	public Boolean delMessage(MessageDAO message) {
+        init();
+        Bson filter = eq("id", message.getId());
+        DeleteResult result = messages.deleteOne(filter);
+        return result.wasAcknowledged() ;
 	}
-	public CosmosItemResponse<MessageDAO> putMessage(MessageDAO message) {
+	public MessageDAO putMessage(MessageDAO message) {
 		init();
-		return null;//messages.createItem(message);
+        InsertOneResult result=messages.insertOne(MessageDAO.toDBObject(message));
+        if (result.wasAcknowledged())
+            return message;
+        else
+            return null;
 	}
 
-	public CosmosPagedIterable<MessageDAO> getMessageById( String id) {
-		init();
-		return null;//messages.queryItems("SELECT * FROM messages WHERE messages.id=\"" + id + "\"", new CosmosQueryRequestOptions(), MessageDAO.class);
+	public MessageDAO getMessageById( String id) {
+        init();
+        return (MessageDAO) messages.find(eq("id", id)).first();
 	}
 
 	public CosmosPagedIterable<MessageDAO> getMessages(int offset, int limit) {
