@@ -9,17 +9,24 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.InsertOneResult;
 import com.mongodb.client.result.UpdateResult;
+import org.bson.codecs.configuration.CodecProvider;
+import org.bson.codecs.configuration.CodecRegistry;
+import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.conversions.Bson;
 import scc.data.Channel.ChannelDAO;
 import scc.data.Garbage.Garbage;
 import scc.data.Message.MessageDAO;
+import scc.data.User.User;
 import scc.data.User.UserDAO;
 
 
+import static com.mongodb.MongoClientSettings.getDefaultCodecRegistry;
 import static com.mongodb.client.model.Filters.eq;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 public class MongoDB {
-	private static final String CONNECTION_URL = System.getenv("MONGO_URL");//;
+	private static final String CONNECTION_URL = "mongodb://"+System.getenv("MONGO_URL");//;
 	private static final String DB_KEY = System.getenv("COSMOSDB_KEY");//;
 	private static final String DB_NAME = System.getenv("MONGO_DATABASE");//
 
@@ -30,7 +37,6 @@ public class MongoDB {
 			return instance;
 
 		MongoClient mongoClient = MongoClients.create(CONNECTION_URL);
-
 		instance = new MongoDB( mongoClient);
 		return instance;
 
@@ -50,8 +56,10 @@ public class MongoDB {
 	private synchronized void init() {
 		if( db != null)
 			return;
-		db = mongoClient.getDatabase(DB_NAME);
-		users = db.getCollection("users",UserDAO.class);
+		CodecProvider pojoCodecProvider = PojoCodecProvider.builder().automatic(true).build();
+		CodecRegistry pojoCodecRegistry = fromRegistries(getDefaultCodecRegistry(), fromProviders(pojoCodecProvider));
+		db = mongoClient.getDatabase(DB_NAME).withCodecRegistry(pojoCodecRegistry);
+		users = db.getCollection("users", UserDAO.class);
 		messages= db.getCollection("messages",MessageDAO.class);
 		channels = db.getCollection("channels",ChannelDAO.class);
         garbage = db.getCollection("garbage",Garbage.class);
@@ -59,6 +67,9 @@ public class MongoDB {
 	}
 	//------------------------------Messages------------------------------
 
+	public String getDB(){
+		return mongoClient.listDatabaseNames().first();
+	}
 
 	public CosmosItemResponse<Object> delMessageById(String id) {
 		init();
@@ -152,7 +163,7 @@ public class MongoDB {
 
 	public UserDAO putUser(UserDAO user) {
 		init();
-		InsertOneResult result=users.insertOne(UserDAO.toDBObject(user));
+		InsertOneResult result=users.insertOne(user);
 		if (result.wasAcknowledged())
 			return user;
 		else
@@ -181,7 +192,8 @@ public class MongoDB {
 
 	public UserDAO getUserByUsername( String username) {
 		init();
-		return (UserDAO) users.find(eq("name", username)).first();
+		UserDAO user = (UserDAO) users.find(eq("name", username)).first();
+		return user;
 	}
 
 

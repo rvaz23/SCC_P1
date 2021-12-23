@@ -3,6 +3,7 @@ package scc.data.User;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.bson.Document;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import scc.data.User.User;
 
 import java.util.ArrayList;
@@ -18,10 +19,15 @@ import static java.util.Arrays.asList;
 public class UserDAO {
 	private String _rid;
 	private String _ts;
+	@BsonProperty(value = "id")
 	private String id;
+	@BsonProperty(value = "name")
 	private String name;
+	@BsonProperty(value = "pwd")
 	private String pwd;
+	@BsonProperty(value = "photoId")
 	private String photoId;
+	@BsonProperty(value = "channelIds")
 	private ArrayList<String> channelIds;
 
 	public static Document toDBObject(UserDAO user) {
