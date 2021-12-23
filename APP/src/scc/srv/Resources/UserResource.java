@@ -165,8 +165,8 @@ public class UserResource {
 
 
 
-    /**
-       * Add user with Id to channel with Id
+
+
 
     @POST
     @Path("/{id}/subscribe/{channelId}")
@@ -219,9 +219,8 @@ public class UserResource {
     }
 
 
-    /**
-     * Remove user with Id to channel with Id
 
+/*
     @POST
     @Path("/{id}/remove/{channelId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -253,7 +252,7 @@ public class UserResource {
 
 
     }
-
+/*
     private UserDAO unsubscribeComputation(String idUser, String idChannel) throws JsonProcessingException {
         Optional<ChannelDAO> optional1 = db.getChannelById(idChannel).stream().findFirst();
         if (optional1.isPresent()) {
@@ -281,7 +280,7 @@ public class UserResource {
     /**
      * Get channels associated to user id
      *
-     * @return
+     * @return*/
 
     @GET
     @Path("/{id}/channels")
@@ -314,62 +313,10 @@ public class UserResource {
 
 
 
-    /**
-     * Updates and returns the user if id is valid.
-
-    @PUT
-    @Path("/{id}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response updateById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id, User user) throws JsonProcessingException {
-        String cookie = GetObjects.getCookie(session);
-        if (cookie.equals(""))
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-        UserDAO u = getUserFromDb(id);
-        if (u != null) {
-            if (cache.verifySessionCookie(cookie, u.getId())) {
-                if (user.getName() != null || !user.getName().equals("")) {
-                    u.setName(user.getName());
-                }
-                if (user.getPhotoId() != null || !user.getPhotoId().equals("")) {
-                    u.setPhotoId(user.getPhotoId());
-                }
-                if (user.getPwd() != null || !user.getPwd().equals("")) {
-                    u.setPwd(user.getPwd());
-                }
-                db.updateUser(id, u);
-                cache.setUser(u.toUser());
-            }
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-        }
-        return Response.status(Response.Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
-    }
-
-    @DELETE
-    @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteById(@CookieParam("scc:session") Cookie session, @PathParam("id") String id) throws JsonProcessingException {
-        log.info("deleteById Action Requested at User Resource");
-        String cookie = GetObjects.getCookie(session);
-        if (cookie.equals(""))
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-        UserDAO user = getUserFromDb(id);
-        if (user != null) {
-            if (cache.verifySessionCookie(cookie, user.getId())) {
-                db.delUser(user);
-                cache.deleteUser(id);
-                db.putGarbage(new Garbage("USER", user.getId()));
-                return Response.status(Response.Status.OK).entity(user.toUser()).build();
-            }
-            return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
-        }
-        return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
-    }
-
 
     /**
      * Lists the ids of all users.
-     *
+     **/
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -382,7 +329,7 @@ public class UserResource {
         }
         return Response.status(Response.Status.OK).entity(ids).build();
     }
-
+/*
     private UserDAO getUserFromDb(String idUser) throws JsonProcessingException {
         UserDAO user = null;
         Optional<UserDAO> op = db.getUserById(idUser).stream().findFirst();
@@ -393,6 +340,6 @@ public class UserResource {
         return user;
     }
 
-    */
+*/
 
 }
