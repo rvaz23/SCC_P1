@@ -53,17 +53,19 @@ public class MediaResource {
         String key = Hash.of(contents);
 
         try {
+
             File file = new File("media/" + key);
             if (file.createNewFile()) {
                 FileOutputStream outputStream = new FileOutputStream(file);
                 outputStream.write(contents);
                 return key;
+                //return file.getCanonicalPath();
             }
         } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
-        return key;
+        return "Error";
     }
 
     /**
@@ -88,7 +90,9 @@ public class MediaResource {
 
         byte[] file = null;
         try {
-            file = Files.readAllBytes(java.nio.file.Path.of("media/" + id));
+            String currentPath = new java.io.File(".").getCanonicalPath();
+            file = Files.readAllBytes(java.nio.file.Path.of(currentPath+"/media/" + id));
+            return file;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -134,4 +138,13 @@ public class MediaResource {
             }
             return list;
         }
+
+    @GET
+    @Path("/pwd")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String pwd () throws IOException {
+
+        String currentPath = new java.io.File(".").getCanonicalPath();
+        return currentPath;
+    }
     }
