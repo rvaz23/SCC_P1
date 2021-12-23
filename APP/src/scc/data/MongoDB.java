@@ -20,6 +20,9 @@ import scc.data.User.User;
 import scc.data.User.UserDAO;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.mongodb.MongoClientSettings.getDefaultCodecRegistry;
 import static com.mongodb.client.model.Filters.eq;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
@@ -234,19 +237,20 @@ public class MongoDB {
 	
 
 
-	public CosmosPagedIterable<UserDAO> getUsers(int offset,int limit) {
+	public List<UserDAO> getUsers(int offset, int limit) {
 		init();
 		String offString=" OFFSET 0";
-		String limString=" LIMIT 20";
+		int lim =20;
 		if (offset!=0){
-			offString=" OFFSET "+offset;
 		}
 		if (limit!=0){
-			limString=" LIMIT "+limit;
+			lim = limit;
 		}
-		String query ="SELECT * FROM Users ORDER BY Users.id" ;//LIMIT 20";
+		List<UserDAO> list = new ArrayList<>();
+		 users.find().skip(offset).limit(lim).into(list);
+
 		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
-		return null;//users.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), UserDAO.class);
+		return list;//users.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), UserDAO.class);
 	}
 
 	public CosmosPagedIterable<MessageDAO> getMessages(int offset,int limit, String idChannel) {
