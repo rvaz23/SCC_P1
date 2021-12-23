@@ -131,6 +131,8 @@ public class UserResource {
                 }
                 db.updateUser(id, u);
                 cache.setUser(u.toUser());
+                return Response.status(Response.Status.OK).entity(u.toUser()).build();
+
             }
             return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
         }

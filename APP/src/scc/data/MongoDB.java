@@ -186,7 +186,7 @@ public class MongoDB {
 	public boolean updateUser(String id,UserDAO user) {
 		init();
 		Bson query = eq("id",id);
-		UpdateResult updateResult = users.updateOne(query, UserDAO.toDBObject(user));
+		UpdateResult updateResult = users.replaceOne(query, user);
 		return updateResult.wasAcknowledged();
 	}
 
@@ -213,7 +213,7 @@ public class MongoDB {
 		UserDAO somebody = (UserDAO) users.find(eq("id", idUser)).first();
 		somebody.addChannel(idChannel);
 		Bson query = eq("id",idUser);
-		users.updateOne(query, UserDAO.toDBObject(somebody));
+		users.replaceOne(query, somebody);
 		return somebody;
 	}
 
@@ -223,7 +223,7 @@ public class MongoDB {
 		if(somebody!=null){
 			somebody.removeChannel(idChannel);
 			Bson query = eq("id",idUser);
-			users.updateOne(query, UserDAO.toDBObject(somebody));
+			users.replaceOne(query, somebody);
 			return somebody;
 		}
 
