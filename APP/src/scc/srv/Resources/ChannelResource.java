@@ -26,7 +26,7 @@ import java.util.Optional;
 @Log
 @Path("/channel")
 public class ChannelResource {
-    CosmosDBLayer db = CosmosDBLayer.getInstance();
+    MongoDB db = MongoDB.getInstance();
     RedisCache cache = RedisCache.getCachePool();
     CognitiveSearch cogSearch = CognitiveSearch.getInstance();
 
@@ -113,9 +113,8 @@ public class ChannelResource {
 
     private ChannelDAO getChannelFromDb(String idChannel) throws JsonProcessingException {
         ChannelDAO channel = null;
-        Optional<ChannelDAO> op = db.getChannelById(idChannel).stream().findFirst();
-        if (op.isPresent()) {
-            channel = op.get();
+       channel = db.getChannelById(idChannel);
+        if (channel!=null) {
             cache.setChannel(channel.toChannel());
         }
         return channel;
@@ -159,8 +158,8 @@ public class ChannelResource {
     }
 
     private ChannelDAO addToMembersComputation(String idUser, String idChannel) throws JsonProcessingException {
-        UserDAO userDAO = db.addChannelToUser(idUser, idChannel).getItem();
-        ChannelDAO channelDAO = db.addUserToChannel(idChannel, idUser).getItem();
+        UserDAO userDAO = db.addChannelToUser(idUser, idChannel);
+        ChannelDAO channelDAO = db.addUserToChannel(idChannel, idUser);
         cache.setUser(userDAO.toUser());
         cache.setChannel(channelDAO.toChannel());
         return channelDAO;
@@ -204,18 +203,16 @@ public class ChannelResource {
     }
 
     private ChannelDAO removeFromMembersComputation(String idUser, String idChannel) throws JsonProcessingException {
-        Optional<UserDAO> optional = db.getUserById(idUser).stream().findFirst();
-        if (optional.isPresent()){
-            UserDAO user = optional.get();
+        UserDAO user = db.getUserById(idUser);
+        if (user!=null){
             ArrayList<String> channels =user.getChannelIds();
             channels.remove(idChannel);
             user.setChannelIds(channels);
             db.updateUser(idUser,user);
             cache.setUser(user.toUser());
         }
-        Optional<ChannelDAO> optional1 = db.getChannelById(idChannel).stream().findFirst();
-        if (optional1.isPresent()){
-            ChannelDAO channel = optional1.get();
+        ChannelDAO channel = db.getChannelById(idChannel);
+        if (channel!=null){
             ArrayList<String> users = channel.getMembers();
             users.remove(idUser);
             channel.setMembers(users);
