@@ -191,7 +191,7 @@ public class UserResource {
                 if (!channel.getMembers().contains(idUser)) {
                     UserDAO userChanged = subscribeComputation(idUser, idChannel);
                     cache.increment(channel);
-                    return Response.status(Response.Status.OK).entity(userChanged).build();
+                    return Response.status(Response.Status.OK).entity(userChanged.toUser()).build();
                 }
                 return Response.status(Response.Status.OK).entity(user).build();
             } else {
@@ -201,7 +201,7 @@ public class UserResource {
                 if (idUser.equals(userOwner.getId())) {
                     UserDAO userChanged = subscribeComputation(idUser, idChannel);
                     cache.increment(channel);
-                    return Response.status(Response.Status.OK).entity(userChanged).build();
+                    return Response.status(Response.Status.OK).entity(userChanged.toUser()).build();
                 }
                 return Response.status(Response.Status.FORBIDDEN).entity("104").build();
             }
@@ -242,7 +242,7 @@ public class UserResource {
         if (cache.verifySessionCookie(cookie, user.getId())) {
             if (channel.getMembers().contains(idUser)) { // true -> quando o channel e publico
                 UserDAO userChanged = unsubscribeComputation(idUser, idChannel);
-                return Response.status(Response.Status.OK).entity(userChanged).build();
+                return Response.status(Response.Status.OK).entity(userChanged.toUser()).build();
             } else {
                 Response.status(Response.Status.FORBIDDEN).entity("104").build();
             }
