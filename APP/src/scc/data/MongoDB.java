@@ -192,7 +192,7 @@ public class MongoDB {
 	public Boolean delChannelById(String id) {
 		init();
 		Bson query = eq("id", id);
-		DeleteResult res = users.deleteOne(query);
+		DeleteResult res = channels.deleteOne(query);
 		return res.wasAcknowledged() ;
 	}
 

@@ -264,7 +264,7 @@ public class ChannelResource {
     public Response UpdateById(@PathParam("id") String id, Channel newChannel) {
         try {
             log.info("updateById Action Requested at Channel Resource");
-            ChannelDAO c = db.getChannelById(id).stream().findFirst().get();
+            ChannelDAO c = db.getChannelById(id);
             if (newChannel.getId() != null || !newChannel.getId().equals("")) {
                 c.setId(newChannel.getId());
             }

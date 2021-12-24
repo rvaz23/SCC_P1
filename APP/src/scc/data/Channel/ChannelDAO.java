@@ -1,13 +1,18 @@
 package scc.data.Channel;
 
+import org.bson.codecs.pojo.annotations.BsonProperty;
+
 import java.util.ArrayList;
 import java.util.UUID;
 
 public class ChannelDAO {
     private String _rid;
     private String _ts;
+    @BsonProperty(value = "id")
     private String id;
+    @BsonProperty(value = "name")
     private String name;
+    @BsonProperty(value = "owner")
     private String owner;
 
     private boolean publicChannel;
