@@ -212,7 +212,7 @@ public class UserResource {
 
     private UserDAO subscribeComputation(String idUser, String idChannel) throws JsonProcessingException {
         UserDAO user1 = db.addChannelToUser(idUser, idChannel);
-        ChannelDAO channel1 = db.addUserToChannel(idChannel, idUser).getItem();
+        ChannelDAO channel1 = db.addUserToChannel(idChannel, idUser);
         cache.setUser(user1.toUser());
         cache.setChannel(channel1.toChannel());
         return user1;
@@ -220,7 +220,7 @@ public class UserResource {
 
 
 
-/*
+
     @POST
     @Path("/{id}/remove/{channelId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -252,20 +252,18 @@ public class UserResource {
 
 
     }
-/*
+
     private UserDAO unsubscribeComputation(String idUser, String idChannel) throws JsonProcessingException {
-        Optional<ChannelDAO> optional1 = db.getChannelById(idChannel).stream().findFirst();
-        if (optional1.isPresent()) {
-            ChannelDAO channel = optional1.get();
+        ChannelDAO channel = db.getChannelById(idChannel);
+        if (channel!=null) {
             ArrayList<String> users = channel.getMembers();
             users.remove(idUser);
             channel.setMembers(users);
             db.updateChannel(idChannel, channel);
             cache.setChannel(channel.toChannel());
         }
-        Optional<UserDAO> optional = db.getUserById(idUser).stream().findFirst();
-        if (optional.isPresent()) {
-            UserDAO user = optional.get();
+        UserDAO user = db.getUserById(idUser);
+        if (user!=null) {
             ArrayList<String> channels = user.getChannelIds();
             channels.remove(idChannel);
             user.setChannelIds(channels);

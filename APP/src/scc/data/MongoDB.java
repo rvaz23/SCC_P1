@@ -89,7 +89,7 @@ public class MongoDB {
 	}
 	public MessageDAO putMessage(MessageDAO message) {
 		init();
-        InsertOneResult result=messages.insertOne(MessageDAO.toDBObject(message));
+        InsertOneResult result=messages.insertOne(message);
         if (result.wasAcknowledged())
             return message;
         else
@@ -101,69 +101,105 @@ public class MongoDB {
         return (MessageDAO) messages.find(eq("id", id)).first();
 	}
 
-	public CosmosPagedIterable<MessageDAO> getMessages(int offset, int limit) {
+	public List<MessageDAO> getAllMessages(int offset,int limit) {
 		init();
-        String offString=" OFFSET 0";
-        String limString=" LIMIT 20";
-        if (offset!=0){
-            offString=" OFFSET "+offset;
-        }
-        if (limit!=0){
-            limString=" LIMIT "+limit;
-        }
-        String query = "SELECT * FROM messages";
-        return null;//messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
+		int lim =20;
+		int off=0;
+		if (offset!=0){
+			off=offset;
+		}
+		if (limit!=0){
+			lim = limit;
+		}
+		List<MessageDAO> list = new ArrayList<>();
+		messages.find().skip(off).limit(lim).into(list);
+		return list;
+	}
+
+
+	public List<MessageDAO> getMessages(int offset,int limit, String idChannel) {
+		init();
+		int lim =20;
+		int off=0;
+		if (offset!=0){
+			off=offset;
+		}
+		if (limit!=0){
+			lim = limit;
+		}
+		List<MessageDAO> list = new ArrayList<>();
+		messages.find(eq("channel", idChannel)).skip(off).limit(lim).into(list);
+		return list;//messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
 	//------------------------------Channels------------------------------
 
 
-	public CosmosItemResponse<ChannelDAO> addUserToChannel(String idChannel, String idUser) {
+	public ChannelDAO addUserToChannel(String idChannel, String idUser) {
 		init();
-		PartitionKey key = new PartitionKey( idChannel);
-		return null;//channels.patchItem(idChannel, key, CosmosPatchOperations.create().add("/members/0",idUser), ChannelDAO.class);
+		ChannelDAO channel = (ChannelDAO) channels.find(eq("id", idChannel)).first();
+		ArrayList<String> l =channel.getMembers();
+		l.add(idUser);
+		channel.setMembers(l);
+		Bson query = eq("id",idChannel);
+		channels.replaceOne(query, channel);
+		return channel;
 	}
 
-    public CosmosItemResponse<ChannelDAO> removeUserFromChannel(String idChannel, String idUser) {
-        init();
-        PartitionKey key = new PartitionKey( idChannel);
-        return null;//channels.patchItem(idChannel, key, CosmosPatchOperations.create().remove("/members/" + idUser), ChannelDAO.class);
+    public ChannelDAO removeUserFromChannel(String idChannel, String idUser) {
+		init();
+		ChannelDAO channel = (ChannelDAO) channels.find(eq("id", idChannel)).first();
+		if(channel!=null){
+			ArrayList<String> l =channel.getMembers();
+			l.remove(idUser);
+			channel.setMembers(l);
+			Bson query = eq("id",idChannel);
+			channels.replaceOne(query, channel);
+			return channel;
+		}
+
+		return null;
     }
 
-	public CosmosItemResponse<ChannelDAO> putChannel(ChannelDAO channel) {
+	public ChannelDAO putChannel(ChannelDAO channel) {
 		init();
-		return null;//channels.createItem(channel);
+		InsertOneResult result=channels.insertOne(channel);
+		if (result.wasAcknowledged())
+			return channel;
+		else
+			return null;
 	}
 
 
-	public CosmosPagedIterable<ChannelDAO> getChannels(int offset, int limit) {
+	public List<ChannelDAO> getChannels(int offset, int limit) {
 		init();
-        String offString=" OFFSET 0";
-        String limString=" LIMIT 20";
-        if (offset!=0){
-            offString=" OFFSET "+offset;
-        }
-        if (limit!=0){
-            limString=" LIMIT "+limit;
-        }
-        String query = "SELECT * FROM channels";
-        return null;//channels.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), ChannelDAO.class);
+		int lim =20;
+		int off=0;
+		if (offset!=0){
+			off=offset;
+		}
+		if (limit!=0){
+			lim = limit;
+		}
+		List<ChannelDAO> list = new ArrayList<>();
+		channels.find().skip(off).limit(lim).into(list);
+		return list;
 	}
 
-	public CosmosPagedIterable<ChannelDAO> getChannelById( String id) {
+	public ChannelDAO getChannelById( String id) {
 		init();
-		return null;//channels.queryItems("SELECT * FROM channels WHERE channels.id=\"" + id + "\"", new CosmosQueryRequestOptions(), ChannelDAO.class);
+		return (ChannelDAO) channels.find(eq("id", id)).first();	}
+
+	public Boolean delChannelById(String id) {
+		init();
+		Bson query = eq("id", id);
+		DeleteResult res = users.deleteOne(query);
+		return res.wasAcknowledged() ;
 	}
 
-	public CosmosItemResponse<Object> delChannelById(String id) {
-		init();
-		PartitionKey key = new PartitionKey( id);
-		return null;//channels.deleteItem(id, key, new CosmosItemRequestOptions());
-	}
-
-	public CosmosItemResponse<ChannelDAO> updateChannel(String id,ChannelDAO channel) {
-		init();
-		PartitionKey key = new PartitionKey( id);
-		return null;//UserDAOchannels.replaceItem(channel,id,key,new CosmosItemRequestOptions());
+	public boolean updateChannel(String id,ChannelDAO channel) {
+		Bson query = eq("id",id);
+		UpdateResult updateResult = channels.replaceOne(query, channel);
+		return updateResult.wasAcknowledged();
 	}
 
 
@@ -247,34 +283,19 @@ public class MongoDB {
 
 	public List<UserDAO> getUsers(int offset, int limit) {
 		init();
-		String offString=" OFFSET 0";
 		int lim =20;
+		int off=0;
 		if (offset!=0){
+			off=offset;
 		}
 		if (limit!=0){
 			lim = limit;
 		}
 		List<UserDAO> list = new ArrayList<>();
-		 users.find().skip(offset).limit(lim).into(list);
+		 users.find().skip(off).limit(lim).into(list);
 
 		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
 		return list;//users.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), UserDAO.class);
-	}
-
-	public CosmosPagedIterable<MessageDAO> getMessages(int offset,int limit, String idChannel) {
-		init();
-		String offString=" OFFSET 0";
-		String limString=" LIMIT 20";
-		if (offset!=0){
-			offString=" OFFSET "+offset;
-		}
-		if (limit!=0){
-			limString=" LIMIT "+limit;
-		}
-
-		String query ="SELECT * FROM messages WHERE messages.channelId=\"" + idChannel +"\" ORDER BY messages.id "   ;
-		//SELECT * FROM Users ORDER BY Users.id OFFSET 20 LIMIT 10
-		return null;//messages.queryItems(query+offString+limString, new CosmosQueryRequestOptions(), MessageDAO.class);
 	}
 
 
