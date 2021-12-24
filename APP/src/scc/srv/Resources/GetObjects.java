@@ -55,9 +55,9 @@ public class GetObjects {
     public static Message getMessageIfExists(String idMessage) throws JsonProcessingException {
         Message message = cache.getMessage(idMessage);
         if(message==null){
-            Optional<MessageDAO> op = db.getMessageById(idMessage).stream().findFirst();
-            if (op.isPresent()) {
-                message = op.get().toMessage();
+            MessageDAO m = db.getMessageById(idMessage);
+            if (m!=null) {
+                message = m.toMessage();
                 cache.setMessage(message);
             }
         }

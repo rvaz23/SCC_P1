@@ -1,5 +1,7 @@
 package scc.data.Message;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import scc.data.Message.Message;
 
 public class MessageDAO {
@@ -11,6 +13,17 @@ public class MessageDAO {
     private String text;
     private String imageId;
     private String replyTo;
+
+
+    public static final DBObject toDBObject(MessageDAO message) {
+        return new BasicDBObject("id", message.getId())
+                .append("user", message.getUser())
+                .append("channel", message.getChannel())
+                .append("text", message.getText())
+                .append("imageId", message.getImageId())
+                .append("replyTo", message.getReplyTo());
+    }
+
 
     public MessageDAO() {
     }
@@ -68,6 +81,15 @@ public class MessageDAO {
     public String getChannelId() {
         return channel;
     }
+
+    public String getChannel() {
+        return channel;
+    }
+
+    public void setChannel(String channel) {
+        this.channel = channel;
+    }
+
 
     public void setChannelId(String channelId) {
         this.channel = channelId;
