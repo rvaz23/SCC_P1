@@ -2,16 +2,23 @@ package scc.data.Message;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.bson.codecs.pojo.annotations.BsonProperty;
 import scc.data.Message.Message;
 
 public class MessageDAO {
     private String _rid;
     private String _ts;
+    @BsonProperty(value = "id")
     private String id;
+    @BsonProperty(value = "user")
     private String user;
+    @BsonProperty(value = "channel")
     private String channel;
+    @BsonProperty(value = "text")
     private String text;
+    @BsonProperty(value = "imageId")
     private String imageId;
+    @BsonProperty(value = "replyTo")
     private String replyTo;
 
 
