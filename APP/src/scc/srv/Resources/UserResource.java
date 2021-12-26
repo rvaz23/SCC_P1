@@ -63,11 +63,11 @@ public class UserResource {
         log.info("Create Action Requested at User Resource");
         UserDAO userDAO = new UserDAO(user);
 
-        if (db.getUserById(user.getId()) !=null) {
+        if (db.getUserById(user.getId()) != null) {
             return Response.status(Status.BAD_REQUEST).entity(Quotes.USER_EXISTS).build();
         }
 
-        if (db.getUserByUsername(user.getName())!=null) {
+        if (db.getUserByUsername(user.getName()) != null) {
             return Response.status(Status.BAD_REQUEST).entity(Quotes.USER_EXISTS).build();
         }
 
@@ -99,10 +99,10 @@ public class UserResource {
         }
     }
 
-    private UserDAO getUserFromDb(String idUser)  {
+    private UserDAO getUserFromDb(String idUser) {
         UserDAO user = null;
         UserDAO u = db.getUserById(idUser);
-        if (u!=null) {
+        if (u != null) {
             user = u;
             cache.setUser(user.toUser());
         }
@@ -161,13 +161,6 @@ public class UserResource {
     }
 
 
-
-
-
-
-
-
-
     @POST
     @Path("/{id}/subscribe/{channelId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -219,8 +212,6 @@ public class UserResource {
     }
 
 
-
-
     @POST
     @Path("/{id}/remove/{channelId}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -255,7 +246,7 @@ public class UserResource {
 
     private UserDAO unsubscribeComputation(String idUser, String idChannel) throws JsonProcessingException {
         ChannelDAO channel = db.getChannelById(idChannel);
-        if (channel!=null) {
+        if (channel != null) {
             ArrayList<String> users = channel.getMembers();
             users.remove(idUser);
             channel.setMembers(users);
@@ -263,7 +254,7 @@ public class UserResource {
             cache.setChannel(channel.toChannel());
         }
         UserDAO user = db.getUserById(idUser);
-        if (user!=null) {
+        if (user != null) {
             ArrayList<String> channels = user.getChannelIds();
             channels.remove(idChannel);
             user.setChannelIds(channels);
@@ -278,7 +269,8 @@ public class UserResource {
     /**
      * Get channels associated to user id
      *
-     * @return*/
+     * @return
+     */
 
     @GET
     @Path("/{id}/channels")
@@ -295,21 +287,16 @@ public class UserResource {
         if (user == null)
             return Response.status(Status.NOT_FOUND).entity(Quotes.USER_NOT_FOUND).build();
 
-        List<String> channelIds;
+        List<String> channelIds = new ArrayList<>();
 
         if (cache.verifySessionCookie(cookie, user.getId())) {
             channelIds = user.getChannelIds();
-            if (channelIds.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND).entity(Quotes.CHANNEL_NOT_FOUND).build();
-            } else {
-                return Response.status(Response.Status.OK).entity(channelIds).build();
-            }
+            return Response.status(Response.Status.OK).entity(channelIds).build();
+
         }
         return Response.status(Response.Status.FORBIDDEN).entity(Quotes.FORBIDEN_ACCESS).build();
 
     }
-
-
 
 
     /**
