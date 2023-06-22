@@ -3,12 +3,17 @@
 Projeto de um serviço de mensagens (Discord)-backend usando ferramentas da cloud Azure
 
 Base de Dados:CosmosDb
+
 FileStorage:BlobStorage
+
 Cache:Redis
 
 Functions:
+
 -Replicar ficheiros entre BlobStorages em diferentes regioes
+
 -Remoçao de ficheiros
+
 -Criaçao/update de trend keywords
 
 
